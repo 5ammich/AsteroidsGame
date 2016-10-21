@@ -1,3 +1,19 @@
+import processing.core.*; 
+import processing.data.*; 
+import processing.event.*; 
+import processing.opengl.*; 
+
+import java.util.HashMap; 
+import java.util.ArrayList; 
+import java.io.File; 
+import java.io.BufferedReader; 
+import java.io.PrintWriter; 
+import java.io.InputStream; 
+import java.io.OutputStream; 
+import java.io.IOException; 
+
+public class AsteroidsGame extends PApplet {
+
 public final int NUM_STARS = 200;
 public final int INITIAL_ASTEROIDS = 10;
 
@@ -6,7 +22,7 @@ ArrayList<Star> stars = new ArrayList<Star>();
 ArrayList<Asteroid> asteroids = new ArrayList<Asteroid>();
 
 public void setup() {
-  size(1000, 700);
+  
   frameRate(60);
   ship = new SpaceShip();
   for(int i = 0; i < NUM_STARS; i++) {
@@ -33,13 +49,13 @@ public void draw() {
 public void keyPressed() {
   switch(key) {
     case 'w':
-      ship.accelerate(0.1);
+      ship.accelerate(0.1f);
       break;
     case 'a':
       ship.rotate(-10);
       break;
     case 's':
-      ship.accelerate(-0.1);
+      ship.accelerate(-0.1f);
       break;
     case 'd':
       ship.rotate(10);
@@ -213,5 +229,15 @@ public class Star {
   public void show() {
     fill(255);
     ellipse((float)x,(float)y,1,1);
+  }
+}
+  public void settings() {  size(1000, 700); }
+  static public void main(String[] passedArgs) {
+    String[] appletArgs = new String[] { "AsteroidsGame" };
+    if (passedArgs != null) {
+      PApplet.main(concat(appletArgs, passedArgs));
+    } else {
+      PApplet.main(appletArgs);
+    }
   }
 }
