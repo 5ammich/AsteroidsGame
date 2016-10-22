@@ -1,217 +1,147 @@
-public final int NUM_STARS = 200;
-public final int INITIAL_ASTEROIDS = 10;
+/* Constant variables */
+public final int NUM_STARS = 500;
+public final int MAX_VELOCITY = 3;
+public final double SHIP_ACCELERATION = 0.025;
 
+/* Object variables */
 SpaceShip ship;
 ArrayList<Star> stars = new ArrayList<Star>();
 ArrayList<Asteroid> asteroids = new ArrayList<Asteroid>();
 
+/* Other variables */
+HashMap<String,Boolean> keys = new HashMap<String,Boolean>();
+
 public void setup() {
+  /* Set screen size, framerate*/
   size(1000, 700);
   frameRate(60);
+
+  /* Initialize objects */
   ship = new SpaceShip();
   for(int i = 0; i < NUM_STARS; i++) {
     stars.add(new Star());
   }
-  for(int i = 0; i < INITIAL_ASTEROIDS; i++) {
-    asteroids.add(new Asteroid());
-  }
+
+  /* Initialize hashmap keys */
+  keys.put("w", false);
+  keys.put("s", false);
+  keys.put("a", false);
+  keys.put("d", false);
+  keys.put("q", false);
 }
 
 public void draw() {
+  /* Runs supposedly 60 times per second */
   background(0);
-  for(int i = 0; i < stars.size(); i++) {
-    stars.get(i).show();
-  }
-  for(int i = 0; i < INITIAL_ASTEROIDS; i++) {
-    asteroids.get(i).move();
-    asteroids.get(i).show();
-  }
-  ship.show();
-  ship.move();
+  showStars();
+  showAsteroids();
+  checkKeyValues();
+  showShip();
 }
 
 public void keyPressed() {
+
+  /* Switch case when key is pressed that assigns true
+  to a hashmap key */
+
   switch(key) {
     case 'w':
-      ship.accelerate(0.1);
-      break;
-    case 'a':
-      ship.rotate(-10);
+      keys.put("w", true);
       break;
     case 's':
-      ship.accelerate(-0.1);
+      keys.put("s", true);
+      break;
+    case 'a':
+      keys.put("a", true);
       break;
     case 'd':
-      ship.rotate(10);
+      keys.put("d", true);
       break;
     case 'q':
+      /* HYPERSPACE!!! aka teleport somewhere and stop */
       ship.setX((int)(Math.random()*width));
       ship.setY((int)(Math.random()*height));
       ship.setDirectionX(0);
       ship.setDirectionY(0);
       ship.setPointDirection((int)(Math.random()*360));
       break;
-    default:
+  }
+}
+
+public void keyReleased() {
+
+  /* Switch case when key is released that assigns false
+  to a hashmap key */
+
+  switch(key) {
+    case 'w':
+      keys.put("w", false);
+    case 's':
+      keys.put("s", false);
+      break;
+    case 'a':
+      keys.put("a", false);
+      break;
+    case 'd':
+      keys.put("d", false);
       break;
   }
 }
 
-class Asteroid extends Floater {
+public void showAsteroids() {
 
-  public int rotationSpeed;
-
-  public Asteroid() {
-    corners = 4;
-    int[] xC = {3,-3,-3,3};
-    int[] yC = {-3,-3,3,3};
-    xCorners = xC;
-    yCorners = yC;
-    myCenterX = (int)(Math.random()*width);
-    myCenterY = (int)(Math.random()*height);
-    myDirectionX = (double)(Math.random()*20);
-    myDirectionY = (double)(Math.random()*20);
-    myPointDirection = 0;
-    rotationSpeed = (int)(Math.random()*50-25);
+  /* Randomly adds more asteroids */
+  if ((int)(Math.random()*10) == 0) {
+    asteroids.add(new Asteroid());
   }
 
-  public void setX(int x){myCenterX = x;}
-  public int getX(){return (int)myCenterX;}
-  public void setY(int y){myCenterY = y;}
-  public int getY(){return (int)myCenterY;}
-  public void setDirectionX(double x){myDirectionX = x;}
-  public double getDirectionX(){return myDirectionX;}
-  public void setDirectionY(double y){myDirectionY = y;}
-  public double getDirectionY(){return myDirectionY;}
-  public void setPointDirection(int degrees){myPointDirection = degrees;}
-  public double getPointDirection(){return myPointDirection;}
-
-  public void move() {
-    myCenterX += myDirectionX;
-    myCenterY += myDirectionY;
-    myPointDirection += rotationSpeed;
-    //wrap around screen
-    if(myCenterX > width) {
-      myCenterX = 0;
-    } else if (myCenterX<0) {
-      myCenterX = width;
-    } if(myCenterY >height) {
-      myCenterY = 0;
-    } else if (myCenterY < 0) {
-      myCenterY = height;
+  /* Moves an asteroid, shows it, and then removes it if conditions are met */
+  for(int i = asteroids.size()-1; i >= 0; i--) {
+    asteroids.get(i).move();
+    asteroids.get(i).show();
+    if(dist(ship.getX(), ship.getY(), asteroids.get(i).getX(), asteroids.get(i).getY()) < 20 || asteroids.get(i).getX() > width || asteroids.get(i).getX() < 0 || asteroids.get(i).getY() > height || asteroids.get(i).getY() < 0) {
+      asteroids.remove(i);
     }
   }
 
 }
 
-class SpaceShip extends Floater {
-
-  public SpaceShip() {
-    corners = 4;
-    int[] xC = {12,-6,0,-6};
-    int[] yC = {0,-6,0,6};
-    xCorners = xC;
-    yCorners = yC;
-    myColor = color(255,255,255);
-    myCenterX = width/2;
-    myCenterY = height/2;
-    myDirectionX = 0;
-    myDirectionY = 0;
-    myPointDirection = 0;
-  }
-
-  public void setX(int x){myCenterX = x;}
-  public int getX(){return (int)myCenterX;}
-  public void setY(int y){myCenterY = y;}
-  public int getY(){return (int)myCenterY;}
-  public void setDirectionX(double x){myDirectionX = x;}
-  public double getDirectionX(){return myDirectionX;}
-  public void setDirectionY(double y){myDirectionY = y;}
-  public double getDirectionY(){return myDirectionY;}
-  public void setPointDirection(int degrees){myPointDirection = degrees;}
-  public double getPointDirection(){return myPointDirection;}
-}
-
-abstract class Floater {
-  protected int corners;  //the number of corners, a triangular floater has 3
-  protected int[] xCorners;
-  protected int[] yCorners;
-  protected int myColor;
-  protected double myCenterX, myCenterY; //holds center coordinates
-  protected double myDirectionX, myDirectionY; //holds x and y coordinates of the vector for direction of travel
-  protected double myPointDirection; //holds current direction the ship is pointing in degrees
-  abstract public void setX(int x);
-  abstract public int getX();
-  abstract public void setY(int y);
-  abstract public int getY();
-  abstract public void setDirectionX(double x);
-  abstract public double getDirectionX();
-  abstract public void setDirectionY(double y);
-  abstract public double getDirectionY();
-  abstract public void setPointDirection(int degrees);
-  abstract public double getPointDirection();
-
-  //Accelerates the floater in the direction it is pointing (myPointDirection)
-  public void accelerate (double dAmount) {
-    //convert the current direction the floater is pointing to radians
-    double dRadians =myPointDirection*(Math.PI/180);
-    //change coordinates of direction of travel
-    myDirectionX += ((dAmount) * Math.cos(dRadians));
-    myDirectionY += ((dAmount) * Math.sin(dRadians));
-  }
-  public void rotate (int nDegreesOfRotation) {
-    //rotates the floater by a given number of degrees
-    myPointDirection+=nDegreesOfRotation;
-  }
-  public void move()   //move the floater in the current direction of travel
-  {
-    //change the x and y coordinates by myDirectionX and myDirectionY
-    myCenterX += myDirectionX;
-    myCenterY += myDirectionY;
-
-    //wrap around screen
-    if(myCenterX > width)
-    {
-      myCenterX = 0;
-    }
-    else if (myCenterX<0)
-    {
-      myCenterX = width;
-    }
-    if(myCenterY >height)
-    {
-      myCenterY = 0;
-    }
-    else if (myCenterY < 0)
-    {
-      myCenterY = height;
-    }
-  }
-  public void show()  //Draws the floater at the current position
-  {
-    fill(myColor);
-    stroke(myColor);
-    //convert degrees to radians for sin and cos
-    double dRadians = myPointDirection*(Math.PI/180);
-    int xRotatedTranslated, yRotatedTranslated;
-    beginShape();
-    for(int nI = 0; nI < corners; nI++) {
-      //rotate and translate the coordinates of the floater using current direction
-      xRotatedTranslated = (int)((xCorners[nI]* Math.cos(dRadians)) - (yCorners[nI] * Math.sin(dRadians))+myCenterX);
-      yRotatedTranslated = (int)((xCorners[nI]* Math.sin(dRadians)) + (yCorners[nI] * Math.cos(dRadians))+myCenterY);
-      vertex(xRotatedTranslated,yRotatedTranslated);
-    }
-    endShape(CLOSE);
+public void showStars() {
+  for(int i = 0; i < stars.size(); i++) {
+    stars.get(i).show();
   }
 }
 
-public class Star {
-  double x,y;
-  Star() {
-    x = (double)(Math.random()*width);
-    y = (double)(Math.random()*width);
+/* Runs through hashmap and moves ship accordingly */
+public void checkKeyValues() {
+  if (keys.get("w") == true) {
+    ship.accelerate(SHIP_ACCELERATION);
   }
-  public void show() {
-    fill(255);
-    ellipse((float)x,(float)y,1,1);
+  if (keys.get("s") == true) {
+    ship.accelerate(-(SHIP_ACCELERATION));
   }
+  if (keys.get("a") == true) {
+    ship.rotate(-3);
+  }
+  if (keys.get("d") == true) {
+    ship.rotate(3);
+  }
+  if (ship.getDirectionX() > MAX_VELOCITY) {
+    ship.setDirectionX(MAX_VELOCITY);
+  }
+  if (ship.getDirectionX() < -(MAX_VELOCITY)) {
+    ship.setDirectionX(-(MAX_VELOCITY));
+  }
+  if (ship.getDirectionY() > MAX_VELOCITY) {
+    ship.setDirectionY(MAX_VELOCITY);
+  }
+  if (ship.getDirectionY() < -(MAX_VELOCITY)) {
+    ship.setDirectionY(-(MAX_VELOCITY));
+  }
+}
+
+/* Show and move spaceship function */
+public void showShip() {
+  ship.show();
+  ship.move();
 }
