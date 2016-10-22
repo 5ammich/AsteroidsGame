@@ -4,12 +4,13 @@ public final int MAX_VELOCITY = 3;
 public final double SHIP_ACCELERATION = 0.025;
 
 /* Object variables */
-SpaceShip ship;
-ArrayList<Star> stars = new ArrayList<Star>();
-ArrayList<Asteroid> asteroids = new ArrayList<Asteroid>();
+public SpaceShip myShip;
+public ArrayList<Star> stars = new ArrayList<Star>();
+public ArrayList<Asteroid> asteroids = new ArrayList<Asteroid>();
+public ArrayList<Bullet> bullets = new ArrayList<Bullet>();
 
 /* Other variables */
-HashMap<String,Boolean> keys = new HashMap<String,Boolean>();
+public HashMap<String,Boolean> keys = new HashMap<String,Boolean>();
 
 public void setup() {
   /* Set screen size, framerate*/
@@ -17,7 +18,7 @@ public void setup() {
   frameRate(60);
 
   /* Initialize objects */
-  ship = new SpaceShip();
+  myShip = new SpaceShip();
   for(int i = 0; i < NUM_STARS; i++) {
     stars.add(new Star());
   }
@@ -28,6 +29,9 @@ public void setup() {
   keys.put("a", false);
   keys.put("d", false);
   keys.put("q", false);
+  keys.put("q", false);
+  keys.put(" ", false);
+
 }
 
 public void draw() {
@@ -35,6 +39,7 @@ public void draw() {
   background(0);
   showStars();
   showAsteroids();
+  showBullets();
   checkKeyValues();
   showShip();
 }
@@ -59,11 +64,14 @@ public void keyPressed() {
       break;
     case 'q':
       /* HYPERSPACE!!! aka teleport somewhere and stop */
-      ship.setX((int)(Math.random()*width));
-      ship.setY((int)(Math.random()*height));
-      ship.setDirectionX(0);
-      ship.setDirectionY(0);
-      ship.setPointDirection((int)(Math.random()*360));
+      myShip.setX((int)(Math.random()*width));
+      myShip.setY((int)(Math.random()*height));
+      myShip.setDirectionX(0);
+      myShip.setDirectionY(0);
+      myShip.setPointDirection((int)(Math.random()*360));
+      break;
+    case ' ':
+      keys.put(" ", true);
       break;
   }
 }
@@ -85,13 +93,16 @@ public void keyReleased() {
     case 'd':
       keys.put("d", false);
       break;
+    case ' ':
+      keys.put(" ", false);
+      break;
   }
 }
 
 public void showAsteroids() {
 
   /* Randomly adds more asteroids */
-  if ((int)(Math.random()*10) == 0) {
+  if ((int)(Math.random()*9) == 0) {
     asteroids.add(new Asteroid());
   }
 
@@ -99,11 +110,10 @@ public void showAsteroids() {
   for(int i = asteroids.size()-1; i >= 0; i--) {
     asteroids.get(i).move();
     asteroids.get(i).show();
-    if(dist(ship.getX(), ship.getY(), asteroids.get(i).getX(), asteroids.get(i).getY()) < 20 || asteroids.get(i).getX() > width || asteroids.get(i).getX() < 0 || asteroids.get(i).getY() > height || asteroids.get(i).getY() < 0) {
+    if(dist(myShip.getX(), myShip.getY(), asteroids.get(i).getX(), asteroids.get(i).getY()) < 20 || asteroids.get(i).getX() > width || asteroids.get(i).getX() < 0 || asteroids.get(i).getY() > height || asteroids.get(i).getY() < 0) {
       asteroids.remove(i);
     }
   }
-
 }
 
 public void showStars() {
@@ -115,33 +125,51 @@ public void showStars() {
 /* Runs through hashmap and moves ship accordingly */
 public void checkKeyValues() {
   if (keys.get("w") == true) {
-    ship.accelerate(SHIP_ACCELERATION);
+    myShip.accelerate(SHIP_ACCELERATION);
   }
   if (keys.get("s") == true) {
-    ship.accelerate(-(SHIP_ACCELERATION));
+    myShip.accelerate(-(SHIP_ACCELERATION));
   }
   if (keys.get("a") == true) {
-    ship.rotate(-3);
+    myShip.rotate(-3);
   }
   if (keys.get("d") == true) {
-    ship.rotate(3);
+    myShip.rotate(3);
   }
-  if (ship.getDirectionX() > MAX_VELOCITY) {
-    ship.setDirectionX(MAX_VELOCITY);
-  }
-  if (ship.getDirectionX() < -(MAX_VELOCITY)) {
-    ship.setDirectionX(-(MAX_VELOCITY));
-  }
-  if (ship.getDirectionY() > MAX_VELOCITY) {
-    ship.setDirectionY(MAX_VELOCITY);
-  }
-  if (ship.getDirectionY() < -(MAX_VELOCITY)) {
-    ship.setDirectionY(-(MAX_VELOCITY));
+  if (keys.get(" ") == true) {
+    if((int)(Math.random()*5) == 0) {
+      bullets.add(new Bullet(myShip));
+    }
   }
 }
 
-/* Show and move spaceship function */
+public void showBullets() {
+  for(int i = bullets.size() - 1; i >= 0; i--) {
+    bullets.get(i).move();
+    bullets.get(i).show();
+    for(int j = asteroids.size()-1; j >= 0; j--) {
+      if (dist(bullets.get(i).getX(), bullets.get(i).getY(), asteroids.get(j).getX(), asteroids.get(j).getY()) <= 20) {
+        asteroids.remove(j);
+        bullets.remove(i);
+      }
+    }
+  }
+}
+
+/* Show and move spacemyShip function */
 public void showShip() {
-  ship.show();
-  ship.move();
+  if (myShip.getDirectionX() > MAX_VELOCITY) {
+    myShip.setDirectionX(MAX_VELOCITY);
+  }
+  if (myShip.getDirectionX() < -(MAX_VELOCITY)) {
+    myShip.setDirectionX(-(MAX_VELOCITY));
+  }
+  if (myShip.getDirectionY() > MAX_VELOCITY) {
+    myShip.setDirectionY(MAX_VELOCITY);
+  }
+  if (myShip.getDirectionY() < -(MAX_VELOCITY)) {
+    myShip.setDirectionY(-(MAX_VELOCITY));
+  }
+  myShip.show();
+  myShip.move();
 }
