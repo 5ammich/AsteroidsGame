@@ -9,7 +9,7 @@ public class Asteroid extends Floater {
     xCorners = xC;
     yCorners = yC;
     myPointDirection = 0;
-    strokeColor = color(255,255,255);
+    strokeColor = color(255,127,80);
     fillColor = color(0,0,0);
     rotationSpeed = (int)(Math.random()*8-4);
 
@@ -17,26 +17,26 @@ public class Asteroid extends Floater {
     int startPos = (int)(Math.random()*4+1);
     switch (startPos) {
       case 1:
-        myCenterX = (int)(Math.random()*width);
+        myCenterX = (int)(Math.random()*MAP_WIDTH);
         myCenterY = 0;
         myDirectionX = (double)(Math.random()*6-3);
         myDirectionY = (double)(Math.random()*3);
         break;
       case 2:
-        myCenterX = (int)(Math.random()*width);
-        myCenterY = height;
+        myCenterX = (int)(Math.random()*MAP_WIDTH);
+        myCenterY = MAP_HEIGHT;
         myDirectionX = (double)(Math.random()*6-3);
         myDirectionY = (double)(Math.random()*-3);
         break;
       case 3:
         myCenterX = 0;
-        myCenterY = (int)(Math.random()*height);
+        myCenterY = (int)(Math.random()*MAP_HEIGHT);
         myDirectionX = (double)(Math.random()*3);
         myDirectionY = (double)(Math.random()*6-3);
         break;
       case 4:
-        myCenterX = width;
-        myCenterY = (int)(Math.random()*height);
+        myCenterX = MAP_WIDTH;
+        myCenterY = (int)(Math.random()*MAP_HEIGHT);
         myDirectionX = (double)(Math.random()*-3);
         myDirectionY = (double)(Math.random()*6-3);
         break;

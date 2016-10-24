@@ -1,18 +1,25 @@
 public class SpaceShip extends Floater {
 
+  int health;
+  int fuel;
+  int heat;
+
   public SpaceShip() {
-    corners = 4;
-    int[] xC = {12,-6,0,-6};
-    int[] yC = {0,-6,0,6};
+    corners = 11;
+    int[] xC = {-14,-10,-12,2,4,14,4,2,-12,-10,-14};
+    int[] yC = {-4,-4,-12,-12,-2,0,2,12,12,4,4};
     xCorners = xC;
     yCorners = yC;
-    fillColor = color(0,0,0);
+    fillColor = color(77,77,255);
     strokeColor = color(255,255,255);
-    myCenterX = width/2;
-    myCenterY = height/2;
+    myCenterX = 425;
+    myCenterY = 350;
     myDirectionX = 0;
     myDirectionY = 0;
     myPointDirection = 0;
+    health = 5;
+    fuel = 10;
+    heat = 0;
   }
 
   public void setX(int x){myCenterX = x;}
