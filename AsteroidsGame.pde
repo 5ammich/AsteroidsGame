@@ -1,18 +1,22 @@
 /* Constant variables */
-public final int NUM_STARS = 3000;
+public final int NUM_STARS = 2000;
 public final int MAX_VELOCITY = 5;
-public final double SHIP_ACCELERATION = 0.1;
+public final double SHIP_ACCELERATION = 0.1; // Add ship limits to ship class
 public final double SHIP_RECOIL = -0.001;
 public final double ASTEROID_SPAWN_CHANCE = 10;
-public final int displayWidth = 1100;
-public final int displayHeight = 700;
+public final int MAX_ASTEROIDS = 50;
 public final int MAP_WIDTH = 5000;
 public final int MAP_HEIGHT = 5000;
 public final int OUT_OF_BOUNDS_COLOR = color(50,0,0);
+public final int displayWidth = 1100;
+public final int displayHeight = 700;
 
 /* Game variables */
-public int gameState = 1;
+public int gameState = 0; // Prod: 0, Dev: 1
 public int score = 0;
+public int asteroidsDestroyed = 0;
+public int bulletsShot = 0;
+public int enemiesDestroyed = 0;
 
 /* Object variables */
 public SpaceShip myShip;
@@ -22,22 +26,16 @@ public ArrayList<Star> stars = new ArrayList<Star>();
 public ArrayList<Asteroid> asteroids = new ArrayList<Asteroid>();
 public ArrayList<Bullet> bullets = new ArrayList<Bullet>();
 public Camera camera;
+public MiniMap minimap;
 
 /* Other variables */
 public HashMap<String,Boolean> keys = new HashMap<String,Boolean>();
 
 public void setup() {
   /* Set screen size, framerate */
-  // fullScreen(P2D);
+  //fullScreen(P2D);
   size(displayWidth,displayHeight,P2D);
   frameRate(60);
-
-  /* Initialize objects */
-  myShip = new SpaceShip();
-  camera = new Camera();
-  for(int i = 0; i < NUM_STARS; i++) {
-    stars.add(new Star());
-  }
 
   /* Initialize hashmap keys */
   keys.put("w", false);
@@ -65,10 +63,42 @@ public void draw() {
       gameOverScreen();
       break;
   }
+  // Put this bottom code somewhere else and make it work
+  if(myShip.getCurrentHealth() <= 0) {
+    gameState = 3;
+  }
 }
 
 public void titleScreen() {
+
+  /* Initialize objects */
+  myShip = new SpaceShip();
+  camera = new Camera();
+  for(int i = 0; i < NUM_STARS; i++) {
+    if(stars.size() <= NUM_STARS) {
+      stars.add(new Star());
+    }
+  }
+  minimap = new MiniMap();
+  for(int i = 0; i < MAX_ASTEROIDS; i++) {
+    if(asteroids.size() <= MAX_ASTEROIDS) {
+      int x = (int)(Math.random()*MAP_WIDTH);
+      int y = (int)(Math.random()*MAP_HEIGHT);
+      asteroids.add(new Asteroid(x,y));
+    }
+  }
+
+  background(0);
+  textSize(16);
+  textAlign(CENTER);
+  fill(255);
+  text("Asteroids and some more", width/2,height/2);
+  text("Press any key to start", width/2, height/2+20);
+  if(keyPressed || mousePressed) {
+    gameState = 1;
+  }
 }
+
 public void gameScreen() {
   /* Moves camera view */
   translate(-camera.pos.x, -camera.pos.y);
@@ -91,6 +121,16 @@ public void gameScreen() {
 public void pauseScreen() {
 }
 public void gameOverScreen() {
+  // Dissapear ship
+  // Explosion animation
+  fill(255,0,0);
+  textAlign(CENTER);
+  text("YOU DIED",width/2, height/2);
+  text("Press any key to try again",width/2, height/2+20);
+  if(keyPressed || mousePressed) {
+    myShip.setCurrentHealth(myShip.getMaxHealth()); // Shouldn't be neccessary after changing some stuff
+    gameState = 0; // When pressed, it only goes to gamestate 0 for a short time then goes to gamestate 1
+  }
 }
 
 /* Switch case when key is pressed that assigns TRUE to a hashmap key */
@@ -145,7 +185,7 @@ public void keyReleased() {
 
 public void showAsteroids() {
   /* Randomly adds more asteroids */
-  if ((int)(Math.random()*ASTEROID_SPAWN_CHANCE) == 0 && asteroids.size() < 50) {
+  if ((int)(Math.random()*ASTEROID_SPAWN_CHANCE) == 0 && asteroids.size() <= MAX_ASTEROIDS) {
     asteroids.add(new Asteroid());
   }
   for(int a = asteroids.size()-1; a >= 0; a--) {
@@ -214,11 +254,13 @@ public void updateCollisions() {
   /* Loops through each asteroid */
   for(int a = asteroids.size()-1; a >= 0; a--) {
     /* Remove asteroid if it's out of the screen or if it hits a ship */
-    if(asteroids.get(a).getX() > MAP_WIDTH || asteroids.get(a).getX() < 0 || asteroids.get(a).getY() > MAP_HEIGHT || asteroids.get(a).getY() < 0) {
+    if(asteroids.get(a).getX() > MAP_WIDTH || asteroids.get(a).getX() < 0 || asteroids.get(a).getY() > MAP_HEIGHT || asteroids.get(a).getY() < 0 || asteroids.get(a).getRotationSpeed() == 0) {
       asteroids.remove(a);
     } else if (dist(asteroids.get(a).getX(), asteroids.get(a).getY(),myShip.getX(), myShip.getY()) < 20) {
+      /* If asteroid hits your ship, GAME OVER */
       asteroids.remove(a);
-      // TODO: game over
+      myShip.setCurrentHealth(0);
+      gameState = 3;
     }
   }
   /* Loops through each bullet */
@@ -235,30 +277,38 @@ public void updateCollisions() {
       }
     }
   }
+  /* Reduce health if out of bounds */
+  if(myShip.getX() < 0 || myShip.getX() > MAP_WIDTH || myShip.getY() < 0 || myShip.getY() > MAP_HEIGHT) {
+    myShip.setCurrentHealth(myShip.getCurrentHealth()-0.05);
+  }
 }
 
 /* Shows HOV graphical user interface - very cool */
 public void showGUI() {
 
+  minimap.render();
+
   /* Draw gray sidebar */
   stroke(255);
   fill(100,100);
-  rect(myShip.getX()+425,myShip.getY()-400,300,1050);
+  rect(myShip.getX()+425,myShip.getY()-400,275,1050);
 
-  /* Map Background */
+  /* Health text */
+  fill(255);
+  textAlign(LEFT);
+  text("Health",myShip.getX()+450,myShip.getY()-90);
+
+  /* Health bar */
   stroke(255);
-  fill(0);
-  rect(myShip.getX()+450,myShip.getY()-325,200,200);
+  fill(255,0,0);
+  rect(myShip.getX()+450,
+       myShip.getY()-80,
+       (float)(myShip.getCurrentHealth()*(200/myShip.getMaxHealth())),
+       10);
 
-  /* Your spaceship on the map */
-  stroke(0,0,255);
-  fill(0,0,255);
-  ellipse(myShip.getX()+450+myShip.getX()/25,myShip.getY()-325+myShip.getY()/25,5,5);
-
-  /* Asteroids on the map */
-  stroke(255,127,80);
-  fill(255,127,80);
-  for(int a = asteroids.size()-1; a >= 0; a--) {
-    ellipse(myShip.getX()+450+asteroids.get(a).getX()/25,myShip.getY()-325+asteroids.get(a).getY()/25,1,1);
-  }
+  /* Fuel bar */
+  /* Heat bar */
+  /* Points */
+  /* Help */
+  /* Pause */
 }

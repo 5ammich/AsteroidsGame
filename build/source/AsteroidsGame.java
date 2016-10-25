@@ -15,20 +15,24 @@ import java.io.IOException;
 public class AsteroidsGame extends PApplet {
 
 /* Constant variables */
-public final int NUM_STARS = 3000;
+public final int NUM_STARS = 2000;
 public final int MAX_VELOCITY = 5;
 public final double SHIP_ACCELERATION = 0.1f;
 public final double SHIP_RECOIL = -0.001f;
 public final double ASTEROID_SPAWN_CHANCE = 10;
-public final int displayWidth = 1100;
-public final int displayHeight = 700;
+public final int MAX_ASTEROIDS = 50;
 public final int MAP_WIDTH = 5000;
 public final int MAP_HEIGHT = 5000;
 public final int OUT_OF_BOUNDS_COLOR = color(50,0,0);
+public final int displayWidth = 1100;
+public final int displayHeight = 700;
 
 /* Game variables */
-public int gameState = 1;
+public int gameState = 0; // Prod: 0, Dev: 1
 public int score = 0;
+public int asteroidsDestroyed = 0;
+public int bulletsShot = 0;
+public int enemiesDestroyed = 0;
 
 /* Object variables */
 public SpaceShip myShip;
@@ -38,22 +42,16 @@ public ArrayList<Star> stars = new ArrayList<Star>();
 public ArrayList<Asteroid> asteroids = new ArrayList<Asteroid>();
 public ArrayList<Bullet> bullets = new ArrayList<Bullet>();
 public Camera camera;
+public MiniMap minimap;
 
 /* Other variables */
 public HashMap<String,Boolean> keys = new HashMap<String,Boolean>();
 
 public void setup() {
   /* Set screen size, framerate */
-  // fullScreen(P2D);
+  //fullScreen(P2D);
   
   frameRate(60);
-
-  /* Initialize objects */
-  myShip = new SpaceShip();
-  camera = new Camera();
-  for(int i = 0; i < NUM_STARS; i++) {
-    stars.add(new Star());
-  }
 
   /* Initialize hashmap keys */
   keys.put("w", false);
@@ -67,6 +65,7 @@ public void setup() {
 
 /* Manages gamestates */
 public void draw() {
+
   switch(gameState) {
     case 0:
       titleScreen();
@@ -81,9 +80,39 @@ public void draw() {
       gameOverScreen();
       break;
   }
+  if(myShip.getCurrentHealth() <= 0) {
+    gameState = 3;
+  }
 }
 
 public void titleScreen() {
+
+  /* Initialize objects */
+  myShip = new SpaceShip();
+  camera = new Camera();
+  for(int i = 0; i < NUM_STARS; i++) {
+    if(stars.size() <= NUM_STARS) {
+      stars.add(new Star());
+    }
+  }
+  minimap = new MiniMap();
+  for(int i = 0; i < MAX_ASTEROIDS; i++) {
+    if(asteroids.size() <= MAX_ASTEROIDS) {
+      int x = (int)(Math.random()*MAP_WIDTH);
+      int y = (int)(Math.random()*MAP_HEIGHT);
+      asteroids.add(new Asteroid(x,y));
+    }
+  }
+
+  background(0);
+  textSize(16);
+  textAlign(CENTER);
+  fill(255);
+  text("Asteroids and some more", width/2,height/2);
+  text("Press any key to start", width/2, height/2+20);
+  if(keyPressed || mousePressed) {
+    gameState = 1;
+  }
 }
 public void gameScreen() {
   /* Moves camera view */
@@ -107,6 +136,16 @@ public void gameScreen() {
 public void pauseScreen() {
 }
 public void gameOverScreen() {
+  // Dissapear ship
+  // Explosion animation
+  fill(255,0,0);
+  textAlign(CENTER);
+  text("YOU DIED",width/2, height/2);
+  text("Press any key to try again",width/2, height/2+20);
+  if(keyPressed || mousePressed) {
+    myShip.setCurrentHealth(myShip.getMaxHealth());
+    gameState = 0;
+  }
 }
 
 /* Switch case when key is pressed that assigns TRUE to a hashmap key */
@@ -161,7 +200,7 @@ public void keyReleased() {
 
 public void showAsteroids() {
   /* Randomly adds more asteroids */
-  if ((int)(Math.random()*ASTEROID_SPAWN_CHANCE) == 0 && asteroids.size() < 50) {
+  if ((int)(Math.random()*ASTEROID_SPAWN_CHANCE) == 0 && asteroids.size() <= MAX_ASTEROIDS) {
     asteroids.add(new Asteroid());
   }
   for(int a = asteroids.size()-1; a >= 0; a--) {
@@ -230,11 +269,13 @@ public void updateCollisions() {
   /* Loops through each asteroid */
   for(int a = asteroids.size()-1; a >= 0; a--) {
     /* Remove asteroid if it's out of the screen or if it hits a ship */
-    if(asteroids.get(a).getX() > MAP_WIDTH || asteroids.get(a).getX() < 0 || asteroids.get(a).getY() > MAP_HEIGHT || asteroids.get(a).getY() < 0) {
+    if(asteroids.get(a).getX() > MAP_WIDTH || asteroids.get(a).getX() < 0 || asteroids.get(a).getY() > MAP_HEIGHT || asteroids.get(a).getY() < 0 || asteroids.get(a).getRotationSpeed() == 0) {
       asteroids.remove(a);
     } else if (dist(asteroids.get(a).getX(), asteroids.get(a).getY(),myShip.getX(), myShip.getY()) < 20) {
+      /* If asteroid hits your ship, GAME OVER */
       asteroids.remove(a);
-      // TODO: game over
+      myShip.setCurrentHealth(0);
+      gameState = 3;
     }
   }
   /* Loops through each bullet */
@@ -251,32 +292,34 @@ public void updateCollisions() {
       }
     }
   }
+  /* Reduce health if out of bounds */
+  if(myShip.getX() < 0 || myShip.getX() > MAP_WIDTH || myShip.getY() < 0 || myShip.getY() > MAP_HEIGHT) {
+    myShip.setCurrentHealth(myShip.getCurrentHealth()-0.05f);
+  }
 }
 
 /* Shows HOV graphical user interface - very cool */
 public void showGUI() {
 
+  minimap.render();
+
   /* Draw gray sidebar */
   stroke(255);
   fill(100,100);
-  rect(myShip.getX()+425,myShip.getY()-400,300,1050);
+  rect(myShip.getX()+425,myShip.getY()-400,275,1050);
 
-  /* Map Background */
+  /* Health text */
+  fill(255);
+  textAlign(LEFT);
+  text("Health",myShip.getX()+450,myShip.getY()-90);
+
+  /* Health bar */
   stroke(255);
-  fill(0);
-  rect(myShip.getX()+450,myShip.getY()-325,200,200);
-
-  /* Your spaceship on the map */
-  stroke(0,0,255);
-  fill(0,0,255);
-  ellipse(myShip.getX()+450+myShip.getX()/25,myShip.getY()-325+myShip.getY()/25,5,5);
-
-  /* Asteroids on the map */
-  stroke(255,127,80);
-  fill(255,127,80);
-  for(int a = asteroids.size()-1; a >= 0; a--) {
-    ellipse(myShip.getX()+450+asteroids.get(a).getX()/25,myShip.getY()-325+asteroids.get(a).getY()/25,1,1);
-  }
+  fill(255,0,0);
+  rect(myShip.getX()+450,
+      myShip.getY()-80,
+      (float)(myShip.getCurrentHealth()*(200/myShip.getMaxHealth())),
+      10);
 }
 public class Asteroid extends Floater {
 
@@ -292,6 +335,8 @@ public class Asteroid extends Floater {
     strokeColor = color(255,127,80);
     fillColor = color(0,0,0);
     rotationSpeed = (int)(Math.random()*8-4);
+    myDirectionX = (double)(Math.random()*6-3);
+    myDirectionY = (double)(Math.random()*3);
 
     /* 4 cases for asteroids to spawn in */
     int startPos = (int)(Math.random()*4+1);
@@ -299,28 +344,36 @@ public class Asteroid extends Floater {
       case 1:
         myCenterX = (int)(Math.random()*MAP_WIDTH);
         myCenterY = 0;
-        myDirectionX = (double)(Math.random()*6-3);
-        myDirectionY = (double)(Math.random()*3);
         break;
       case 2:
         myCenterX = (int)(Math.random()*MAP_WIDTH);
         myCenterY = MAP_HEIGHT;
-        myDirectionX = (double)(Math.random()*6-3);
-        myDirectionY = (double)(Math.random()*-3);
         break;
       case 3:
         myCenterX = 0;
         myCenterY = (int)(Math.random()*MAP_HEIGHT);
-        myDirectionX = (double)(Math.random()*3);
-        myDirectionY = (double)(Math.random()*6-3);
         break;
       case 4:
         myCenterX = MAP_WIDTH;
         myCenterY = (int)(Math.random()*MAP_HEIGHT);
-        myDirectionX = (double)(Math.random()*-3);
-        myDirectionY = (double)(Math.random()*6-3);
         break;
     }
+  }
+
+  public Asteroid(int x, int y) {
+    corners = 4;
+    int[] xC = {10,-10,-10,10};
+    int[] yC = {-10,-10,10,10};
+    xCorners = xC;
+    yCorners = yC;
+    myPointDirection = 0;
+    strokeColor = color(255,127,80);
+    fillColor = color(0,0,0);
+    rotationSpeed = (int)(Math.random()*8-4);
+    myCenterX = x;
+    myCenterY = y;
+    myDirectionX = (double)(Math.random()*6-3);
+    myDirectionY = (double)(Math.random()*3);
   }
 
   public void setX(int x){myCenterX = x;}
@@ -333,6 +386,7 @@ public class Asteroid extends Floater {
   public double getDirectionY(){return myDirectionY;}
   public void setPointDirection(int degrees){myPointDirection = degrees;}
   public double getPointDirection(){return myPointDirection;}
+  public int getRotationSpeed(){return rotationSpeed;}
 
   public void move() {
     myCenterX += myDirectionX;
@@ -368,10 +422,7 @@ public class Bullet extends Floater {
   public double getDirectionY(){return myDirectionY;}
   public void setPointDirection(int degrees){myPointDirection = degrees;}
   public double getPointDirection(){return myPointDirection;}
-  public void move() {
-    myCenterX += myDirectionX;
-    myCenterY += myDirectionY;
-  }
+  
   public void show() {
     fill(fillColor);
     stroke(strokeColor);
@@ -427,12 +478,10 @@ public abstract class Floater {
     //rotates the floater by a given number of degrees
     myPointDirection+=nDegreesOfRotation;
   }
-  public void move()   //move the floater in the current direction of travel
-  {
+  public void move() { //move the floater in the current direction of travel
     //change the x and y coordinates by myDirectionX and myDirectionY
     myCenterX += myDirectionX;
     myCenterY += myDirectionY;
-
   }
   public void show()  //Draws the floater at the current position
   {
@@ -451,9 +500,32 @@ public abstract class Floater {
     endShape(CLOSE);
   }
 }
+public class MiniMap {
+  public MiniMap() {}
+  public void render() {
+    /* Map Background */
+    stroke(255);
+    fill(0);
+    rect(myShip.getX()+450,myShip.getY()-325,200,200);
+
+    /* Your spaceship on the map */
+    stroke(0,0,255);
+    fill(0,0,255);
+    ellipse(myShip.getX()+450+myShip.getX()/(MAP_WIDTH/200),myShip.getY()-325+myShip.getY()/(MAP_HEIGHT/200),5,5);
+
+    /* Asteroids on the map */
+    stroke(255,127,80);
+    fill(255,127,80);
+    for(int a = asteroids.size()-1; a >= 0; a--) {
+      ellipse(myShip.getX()+450+asteroids.get(a).getX()/(MAP_WIDTH/200),
+              myShip.getY()-325+asteroids.get(a).getY()/(MAP_HEIGHT/200),
+              1,1);
+    }
+  }
+}
 public class SpaceShip extends Floater {
 
-  int health;
+  double maxHealth,currentHealth;
   int fuel;
   int heat;
 
@@ -470,7 +542,8 @@ public class SpaceShip extends Floater {
     myDirectionX = 0;
     myDirectionY = 0;
     myPointDirection = 0;
-    health = 5;
+    maxHealth = 5;
+    currentHealth = 5;
     fuel = 10;
     heat = 0;
   }
@@ -485,6 +558,10 @@ public class SpaceShip extends Floater {
   public double getDirectionY(){return myDirectionY;}
   public void setPointDirection(int degrees){myPointDirection = degrees;}
   public double getPointDirection(){return myPointDirection;}
+  public double getMaxHealth(){return maxHealth;}
+  public double getCurrentHealth(){return currentHealth;}
+  public void setMaxHealth(double health){maxHealth = health;}
+  public void setCurrentHealth(double health){currentHealth = health;}
 }
 public class Star {
   double x,y;

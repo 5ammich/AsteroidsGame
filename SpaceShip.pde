@@ -1,6 +1,6 @@
 public class SpaceShip extends Floater {
 
-  int health;
+  double maxHealth,currentHealth;
   int fuel;
   int heat;
 
@@ -17,7 +17,8 @@ public class SpaceShip extends Floater {
     myDirectionX = 0;
     myDirectionY = 0;
     myPointDirection = 0;
-    health = 5;
+    maxHealth = 5;
+    currentHealth = 5;
     fuel = 10;
     heat = 0;
   }
@@ -32,4 +33,8 @@ public class SpaceShip extends Floater {
   public double getDirectionY(){return myDirectionY;}
   public void setPointDirection(int degrees){myPointDirection = degrees;}
   public double getPointDirection(){return myPointDirection;}
+  public double getMaxHealth(){return maxHealth;}
+  public double getCurrentHealth(){return currentHealth;}
+  public void setMaxHealth(double health){maxHealth = health;}
+  public void setCurrentHealth(double health){currentHealth = health;}
 }

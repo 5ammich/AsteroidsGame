@@ -25,10 +25,7 @@ public class Bullet extends Floater {
   public double getDirectionY(){return myDirectionY;}
   public void setPointDirection(int degrees){myPointDirection = degrees;}
   public double getPointDirection(){return myPointDirection;}
-  public void move() {
-    myCenterX += myDirectionX;
-    myCenterY += myDirectionY;
-  }
+  
   public void show() {
     fill(fillColor);
     stroke(strokeColor);
