@@ -5,13 +5,33 @@
 		<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
 		<link rel="stylesheet" href="styles.css">
 		<script src="processing.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/buzz/1.2.0/buzz.min.js"></script>
+		<script type="text/javascript">
+			var bg = new buzz.sound("bg",{formats:["mp3"]});
+
+			var bound = false;
+
+			function bindJavascript() {
+				var pjs = Processing.getInstanceById("AsteroidsGame");
+				if(pjs!=null) {
+					pjs.bindJavascript(this);
+					bound = true;
+				}
+				if(!bound) setTimeout(bindJavascript,250);
+			}
+			bindJavascript();
+
+			function playBgMusic() {
+				bg.play();
+			}
+		</script>
 	</head>
 	<body>
 		<header>
 			<h1>Asteroids and More</h1>
 		</header>
 			<section id="content">
-				<canvas id="AsteroidsGame" data-processing-sources="AsteroidsGame.pde Asteroid.pde Floater.pde SpaceShip.pde Star.pde Bullet.pde Camera.pde MiniMap.pde">
+				<canvas id="AsteroidsGame" data-processing-sources="AsteroidsGame.pde Asteroid.pde Floater.pde SpaceShip.pde Star.pde Bullet.pde Camera.pde MiniMap.pde MyShip.pde">
 				</canvas>
 		    </section>
 	    <footer>

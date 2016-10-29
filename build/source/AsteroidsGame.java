@@ -14,11 +14,11 @@ import java.io.IOException;
 
 public class AsteroidsGame extends PApplet {
 
+//import processing.sound.*;
+
 /* Constant variables */
 public final int NUM_STARS = 2000;
-public final int MAX_VELOCITY = 5;
-public final double SHIP_ACCELERATION = 0.1f;
-public final double SHIP_RECOIL = -0.001f;
+public final double MY_SHIP_ACCELERATION = 0.1f;
 public final double ASTEROID_SPAWN_CHANCE = 10;
 public final int MAX_ASTEROIDS = 50;
 public final int MAP_WIDTH = 5000;
@@ -33,9 +33,10 @@ public int score = 0;
 public int asteroidsDestroyed = 0;
 public int bulletsShot = 0;
 public int enemiesDestroyed = 0;
+public boolean backgroundMusicPlaying = false;
 
 /* Object variables */
-public SpaceShip myShip;
+public MyShip myShip;
 public ArrayList<SpaceShip> allyShips = new ArrayList<SpaceShip>();
 public ArrayList<SpaceShip> enemyShips = new ArrayList<SpaceShip>();
 public ArrayList<Star> stars = new ArrayList<Star>();
@@ -43,9 +44,21 @@ public ArrayList<Asteroid> asteroids = new ArrayList<Asteroid>();
 public ArrayList<Bullet> bullets = new ArrayList<Bullet>();
 public Camera camera;
 public MiniMap minimap;
+//public SoundFile backgroundMusic;
+//public SoundFile soundEffect;
+
+/* Your ship variables */
 
 /* Other variables */
 public HashMap<String,Boolean> keys = new HashMap<String,Boolean>();
+interface JavaScript {
+  public void playBackgroundMusic();
+  public void playSoundEffect();
+}
+public void bindJavascript(JavaScript js) {
+  javascript = js;
+}
+JavaScript javascript;
 
 public void setup() {
   /* Set screen size, framerate */
@@ -65,7 +78,6 @@ public void setup() {
 
 /* Manages gamestates */
 public void draw() {
-
   switch(gameState) {
     case 0:
       titleScreen();
@@ -79,7 +91,11 @@ public void draw() {
     case 3:
       gameOverScreen();
       break;
+    case 4:
+      creditsScreen();
+      break;
   }
+  // Put this bottom code somewhere else and make it work
   if(myShip.getCurrentHealth() <= 0) {
     gameState = 3;
   }
@@ -88,7 +104,7 @@ public void draw() {
 public void titleScreen() {
 
   /* Initialize objects */
-  myShip = new SpaceShip();
+  myShip = new MyShip();
   camera = new Camera();
   for(int i = 0; i < NUM_STARS; i++) {
     if(stars.size() <= NUM_STARS) {
@@ -114,10 +130,20 @@ public void titleScreen() {
     gameState = 1;
   }
 }
+
 public void gameScreen() {
   /* Moves camera view */
   translate(-camera.pos.x, -camera.pos.y);
   camera.draw(myShip);
+
+  /* Background music */
+  /*
+  if(backgroundMusicPlaying == false) {
+    backgroundMusic = new SoundFile(this,"bg.mp3");
+    backgroundMusic.play();
+    backgroundMusicPlaying = true;
+  }
+  */
 
   /* Resets draw screen */
   background(OUT_OF_BOUNDS_COLOR);
@@ -142,10 +168,15 @@ public void gameOverScreen() {
   textAlign(CENTER);
   text("YOU DIED",width/2, height/2);
   text("Press any key to try again",width/2, height/2+20);
+  /*
   if(keyPressed || mousePressed) {
-    myShip.setCurrentHealth(myShip.getMaxHealth());
-    gameState = 0;
+    myShip.setCurrentHealth(myShip.getMaxHealth()); // Shouldn't be neccessary after changing some stuff
+    gameState = 0; // When pressed, it only goes to gamestate 0 for a short time then goes to gamestate 1
   }
+  */
+}
+
+public void creditsScreen() {
 }
 
 /* Switch case when key is pressed that assigns TRUE to a hashmap key */
@@ -164,14 +195,10 @@ public void keyPressed() {
       keys.put("d", true);
       break;
     case 'q':
-      /* HYPERSPACE!!! aka teleport somewhere and stop */
-      myShip.setX((int)(Math.random()*MAP_WIDTH));
-      myShip.setY((int)(Math.random()*MAP_HEIGHT));
-      myShip.setDirectionX(0);
-      myShip.setDirectionY(0);
-      myShip.setPointDirection((int)(Math.random()*360));
-      camera.hyperspeed(myShip);
-      break;
+      if(hasFuel()) {
+        myShip.hyperspace();
+        camera.hyperspace(myShip);
+      } break;
     case ' ':
       keys.put(" ", true);
       break;
@@ -221,11 +248,13 @@ public void showSpace() {
 
 /* Runs through hashmap and moves ship accordingly */
 public void checkKeyValues() {
-  if (keys.get("w") == true) {
-    myShip.accelerate(SHIP_ACCELERATION);
+  if (keys.get("w") == true && hasFuel()) {
+    myShip.accelerate(MY_SHIP_ACCELERATION);
+    myShip.setCurrentFuel(myShip.getCurrentFuel()-0.02f);
   }
-  if (keys.get("s") == true) {
-    myShip.accelerate(-(SHIP_ACCELERATION));
+  if (keys.get("s") == true && hasFuel()) {
+    myShip.accelerate(-(MY_SHIP_ACCELERATION));
+    myShip.setCurrentFuel(myShip.getCurrentFuel()-0.02f);
   }
   if (keys.get("a") == true) {
     myShip.rotate(-3);
@@ -235,7 +264,9 @@ public void checkKeyValues() {
   }
   if (keys.get(" ") == true) {
       bullets.add(new Bullet(myShip));
-      myShip.accelerate(SHIP_RECOIL);
+      myShip.setCurrentHeat(myShip.getCurrentHeat()+0.5f);
+      bulletsShot++;
+      myShip.recoil();
   }
 }
 
@@ -249,18 +280,6 @@ public void showBullets() {
 
 /* Updates, moves, and shows your spaceship */
 public void showShip() {
-  if (myShip.getDirectionX() > MAX_VELOCITY) {
-    myShip.setDirectionX(MAX_VELOCITY);
-  }
-  if (myShip.getDirectionX() < -(MAX_VELOCITY)) {
-    myShip.setDirectionX(-(MAX_VELOCITY));
-  }
-  if (myShip.getDirectionY() > MAX_VELOCITY) {
-    myShip.setDirectionY(MAX_VELOCITY);
-  }
-  if (myShip.getDirectionY() < -(MAX_VELOCITY)) {
-    myShip.setDirectionY(-(MAX_VELOCITY));
-  }
   myShip.move();
   myShip.show();
 }
@@ -288,6 +307,8 @@ public void updateCollisions() {
         if (dist(asteroids.get(a).getX(), asteroids.get(a).getY(),bullets.get(b).getX(), bullets.get(b).getY()) < 20) {
           bullets.remove(b);
           asteroids.remove(a);
+          asteroidsDestroyed++;
+          score++;
         }
       }
     }
@@ -295,6 +316,12 @@ public void updateCollisions() {
   /* Reduce health if out of bounds */
   if(myShip.getX() < 0 || myShip.getX() > MAP_WIDTH || myShip.getY() < 0 || myShip.getY() > MAP_HEIGHT) {
     myShip.setCurrentHealth(myShip.getCurrentHealth()-0.05f);
+  }
+  /* Cool down ship */
+  myShip.setCurrentHeat(myShip.getCurrentHeat()-0.1f);
+  /* Over heat ends life */
+  if(myShip.getCurrentHeat() >= myShip.getMaxHeat()) {
+    myShip.setCurrentHealth(0);
   }
 }
 
@@ -317,10 +344,51 @@ public void showGUI() {
   stroke(255);
   fill(255,0,0);
   rect(myShip.getX()+450,
-      myShip.getY()-80,
-      (float)(myShip.getCurrentHealth()*(200/myShip.getMaxHealth())),
-      10);
+       myShip.getY()-80,
+       (float)(myShip.getCurrentHealth()*(200/myShip.getMaxHealth())),
+       10);
+
+ /* Fuel text */
+ fill(255);
+ textAlign(LEFT);
+ text("Fuel",myShip.getX()+450,myShip.getY()-50);
+
+  /* Fuel bar */
+  stroke(255);
+  fill(0,255,0);
+  rect(myShip.getX()+450,
+       myShip.getY()-40,
+       (float)(myShip.getCurrentFuel()*(200/myShip.getMaxFuel())),
+       10);
+
+  /* Heat text */
+  fill(255);
+  textAlign(LEFT);
+  text("Heat",myShip.getX()+450,myShip.getY()-10);
+
+  /* Heat bar */
+  stroke(255);
+  fill(0,0,255);
+  rect(myShip.getX()+450,
+       myShip.getY()-0,
+       (float)(myShip.getCurrentHeat()*(200/myShip.getMaxHeat())),
+       10);
+
+  /* Points */
+  fill(255);
+  textAlign(LEFT);
+  text("Score: " + score,myShip.getX()+450,myShip.getY()+40);
+  /* Current objective */
+  /* Pause */
+  fill(255);
+  textAlign(LEFT);
+  text("ESC to pause",myShip.getX()+450,myShip.getY()+325);
 }
+
+public boolean hasFuel() {
+  return(myShip.getCurrentFuel()>0);
+}
+
 public class Asteroid extends Floater {
 
   public int rotationSpeed;
@@ -430,22 +498,41 @@ public class Bullet extends Floater {
   }
 }
 public class Camera {
-  PVector pos;
-  double xVelocity, yVelocity;
-  Camera() {
+  public PVector pos;
+  public Camera() {
     pos = new PVector(0, 0);
   }
 
-  public void draw(SpaceShip ship) {
+  public void draw(MyShip ship) {
     pos.x += ship.getDirectionX();
     pos.y += ship.getDirectionY();
   }
 
-  public void hyperspeed(SpaceShip ship) {
+  public void hyperspace(MyShip ship) {
     pos.x = ship.getX() - 425;
     pos.y = ship.getY() - 350;
   }
 }
+/*
+public class EnemyShip extends SpaceShip {
+  public EnemyShip() {
+    corners = 11;
+    int[] xC = {-14,-10,-12,2,4,14,4,2,-12,-10,-14};
+    int[] yC = {-4,-4,-12,-12,-2,0,2,12,12,4,4};
+    xCorners = xC;
+    yCorners = yC;
+    fillColor = color(255,0,0);
+    strokeColor = color(255,255,255);
+    myCenterX = 4900;
+    myCenterY = 4900;
+    myDirectionX = 0;
+    myDirectionY = 0;
+    myPointDirection = 0;
+    maxHealth = 5;
+    currentHealth = 5;
+  }
+}
+*/
 public abstract class Floater {
   protected int corners;  //the number of corners, a triangular floater has 3
   protected int[] xCorners;
@@ -523,13 +610,11 @@ public class MiniMap {
     }
   }
 }
-public class SpaceShip extends Floater {
+public class MyShip extends SpaceShip {
 
-  double maxHealth,currentHealth;
-  int fuel;
-  int heat;
+  private double maxHealth,currentHealth,currentFuel,maxFuel,currentHeat,maxHeat;
 
-  public SpaceShip() {
+  public MyShip() {
     corners = 11;
     int[] xC = {-14,-10,-12,2,4,14,4,2,-12,-10,-14};
     int[] yC = {-4,-4,-12,-12,-2,0,2,12,12,4,4};
@@ -544,9 +629,44 @@ public class SpaceShip extends Floater {
     myPointDirection = 0;
     maxHealth = 5;
     currentHealth = 5;
-    fuel = 10;
-    heat = 0;
+    maxFuel = 100;
+    currentFuel = 100;
+    maxHeat = 50;
+    currentHeat = 0;
+    MAX_VELOCITY = 5;
   }
+
+  public double getMaxHealth(){return maxHealth;}
+  public double getCurrentHealth(){return currentHealth;}
+  public void setMaxHealth(double health){maxHealth = health;}
+  public void setCurrentHealth(double health){currentHealth = health;}
+  public double getMaxFuel(){return maxFuel;}
+  public double getCurrentFuel(){return currentFuel;}
+  public void setMaxFuel(double mf){maxFuel = mf;}
+  public void setCurrentFuel(double cf){currentFuel = cf;}
+  public double getMaxHeat(){return maxHeat;}
+  public double getCurrentHeat(){return currentHeat;}
+  public void setMaxHeat(double mh){maxHeat = mh;}
+  public void setCurrentHeat(double ch){
+    currentHeat = ch;
+    if(currentHeat < 0) {
+      currentHeat = 0;
+    }
+  }
+
+  public void hyperspace() {
+    myCenterX = (int)(Math.random()*MAP_WIDTH);
+    myCenterY = (int)(Math.random()*MAP_HEIGHT);
+    myDirectionX = 0;
+    myDirectionY = 0;
+    myPointDirection = (int)(Math.random()*360);
+    currentFuel -= 10;
+  }
+}
+public abstract class SpaceShip extends Floater {
+
+  protected int MAX_VELOCITY;
+  protected final static double SHIP_RECOIL = -0.001f;
 
   public void setX(int x){myCenterX = x;}
   public int getX(){return (int)myCenterX;}
@@ -558,10 +678,27 @@ public class SpaceShip extends Floater {
   public double getDirectionY(){return myDirectionY;}
   public void setPointDirection(int degrees){myPointDirection = degrees;}
   public double getPointDirection(){return myPointDirection;}
-  public double getMaxHealth(){return maxHealth;}
-  public double getCurrentHealth(){return currentHealth;}
-  public void setMaxHealth(double health){maxHealth = health;}
-  public void setCurrentHealth(double health){currentHealth = health;}
+
+  public void move() {
+    if(myDirectionX > MAX_VELOCITY) {
+      myDirectionX = MAX_VELOCITY;
+    }
+    if(myDirectionX < -(MAX_VELOCITY)) {
+      myDirectionX = -(MAX_VELOCITY);
+    }
+    if(myDirectionY > MAX_VELOCITY) {
+      myDirectionY = MAX_VELOCITY;
+    }
+    if(myDirectionY < -(MAX_VELOCITY)) {
+      myDirectionY = -(MAX_VELOCITY);
+    }
+    myCenterX += myDirectionX;
+    myCenterY += myDirectionY;
+  }
+
+  public void recoil() {
+    accelerate(SHIP_RECOIL);
+  }
 }
 public class Star {
   double x,y;

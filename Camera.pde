@@ -1,16 +1,15 @@
 public class Camera {
-  PVector pos;
-  double xVelocity, yVelocity;
-  Camera() {
+  public PVector pos;
+  public Camera() {
     pos = new PVector(0, 0);
   }
 
-  void draw(SpaceShip ship) {
+  public void draw(MyShip ship) {
     pos.x += ship.getDirectionX();
     pos.y += ship.getDirectionY();
   }
 
-  void hyperspeed(SpaceShip ship) {
+  public void hyperspace(MyShip ship) {
     pos.x = ship.getX() - 425;
     pos.y = ship.getY() - 350;
   }

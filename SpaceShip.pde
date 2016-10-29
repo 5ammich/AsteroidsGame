@@ -1,27 +1,7 @@
-public class SpaceShip extends Floater {
+public abstract class SpaceShip extends Floater {
 
-  double maxHealth,currentHealth;
-  int fuel;
-  int heat;
-
-  public SpaceShip() {
-    corners = 11;
-    int[] xC = {-14,-10,-12,2,4,14,4,2,-12,-10,-14};
-    int[] yC = {-4,-4,-12,-12,-2,0,2,12,12,4,4};
-    xCorners = xC;
-    yCorners = yC;
-    fillColor = color(77,77,255);
-    strokeColor = color(255,255,255);
-    myCenterX = 425;
-    myCenterY = 350;
-    myDirectionX = 0;
-    myDirectionY = 0;
-    myPointDirection = 0;
-    maxHealth = 5;
-    currentHealth = 5;
-    fuel = 10;
-    heat = 0;
-  }
+  protected int MAX_VELOCITY;
+  protected final static double SHIP_RECOIL = -0.001;
 
   public void setX(int x){myCenterX = x;}
   public int getX(){return (int)myCenterX;}
@@ -33,8 +13,25 @@ public class SpaceShip extends Floater {
   public double getDirectionY(){return myDirectionY;}
   public void setPointDirection(int degrees){myPointDirection = degrees;}
   public double getPointDirection(){return myPointDirection;}
-  public double getMaxHealth(){return maxHealth;}
-  public double getCurrentHealth(){return currentHealth;}
-  public void setMaxHealth(double health){maxHealth = health;}
-  public void setCurrentHealth(double health){currentHealth = health;}
+
+  public void move() {
+    if(myDirectionX > MAX_VELOCITY) {
+      myDirectionX = MAX_VELOCITY;
+    }
+    if(myDirectionX < -(MAX_VELOCITY)) {
+      myDirectionX = -(MAX_VELOCITY);
+    }
+    if(myDirectionY > MAX_VELOCITY) {
+      myDirectionY = MAX_VELOCITY;
+    }
+    if(myDirectionY < -(MAX_VELOCITY)) {
+      myDirectionY = -(MAX_VELOCITY);
+    }
+    myCenterX += myDirectionX;
+    myCenterY += myDirectionY;
+  }
+
+  public void recoil() {
+    accelerate(SHIP_RECOIL);
+  }
 }
