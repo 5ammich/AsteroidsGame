@@ -104,7 +104,6 @@ public void titleScreen() {
     }
   }
 
-
   background(0);
   textSize(16);
   textAlign(CENTER);
@@ -113,12 +112,12 @@ public void titleScreen() {
   text("Press p to start", width/2, height/2+20);
 
   /* Background music */
-  /*
-  if(titleMusicPlaying == false) {
+  if(titleMusicPlaying == false && javascript != null) {
     javascript.playSound("title");
     titleMusicPlaying = true;
+    bgMusicPlaying = false;
   }
-  */
+
 }
 
 public void gameScreen() {
@@ -127,9 +126,10 @@ public void gameScreen() {
   camera.draw(myShip);
 
   /* Background music */
-  if(bgMusicPlaying == false) {
+  if(bgMusicPlaying == false && javascript != null) {
     javascript.playSound("bg");
     bgMusicPlaying = true;
+    titleMusicPlaying = false;
   }
 
   /* Resets draw screen */
