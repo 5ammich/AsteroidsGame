@@ -1,3 +1,14 @@
+// TODO: get enter/return key working on browser
+
+/* Connect processing with browser js */
+public interface JavaScript {
+  void playSound(String s);
+}
+public void bindJavascript(JavaScript js) {
+  javascript = js;
+}
+public JavaScript javascript;
+
 /* Constant variables */
 public final int NUM_STARS = 2000;
 public final double MY_SHIP_ACCELERATION = 0.1;
@@ -11,10 +22,11 @@ public final int displayHeight = 700;
 
 /* Game variables */
 public int gameState = 0; // Prod: 0, Dev: 1
-public int score = 0;
+public int score;
 public int asteroidsDestroyed = 0;
 public int bulletsShot = 0;
 public int enemiesDestroyed = 0;
+public boolean titleMusicPlaying = false;
 public boolean bgMusicPlaying = false;
 
 /* Object variables */
@@ -32,14 +44,6 @@ public MiniMap minimap;
 /* Other variables */
 public HashMap<String,Boolean> keys = new HashMap<String,Boolean>();
 
-interface JavaScript {
-  void playBgMusic();
-}
-void bindJavascript(JavaScript js) {
-  javascript = js;
-}
-JavaScript javascript;
-
 public void setup() {
   /* Set screen size, framerate */
   //fullScreen(P2D);
@@ -51,7 +55,6 @@ public void setup() {
   keys.put("s", false);
   keys.put("a", false);
   keys.put("d", false);
-  keys.put("q", false);
   keys.put("q", false);
   keys.put(" ", false);
 }
@@ -85,6 +88,8 @@ public void titleScreen() {
   /* Initialize objects */
   myShip = new MyShip();
   camera = new Camera();
+  bullets.clear();
+  score = 0;
   for(int i = 0; i < NUM_STARS; i++) {
     if(stars.size() <= NUM_STARS) {
       stars.add(new Star());
@@ -99,15 +104,21 @@ public void titleScreen() {
     }
   }
 
+
   background(0);
   textSize(16);
   textAlign(CENTER);
   fill(255);
   text("Asteroids and some more", width/2,height/2);
-  text("Press any key to start", width/2, height/2+20);
-  if(keyPressed || mousePressed) {
-    gameState = 1;
+  text("Press p to start", width/2, height/2+20);
+
+  /* Background music */
+  /*
+  if(titleMusicPlaying == false) {
+    javascript.playSound("title");
+    titleMusicPlaying = true;
   }
+  */
 }
 
 public void gameScreen() {
@@ -117,10 +128,9 @@ public void gameScreen() {
 
   /* Background music */
   if(bgMusicPlaying == false) {
-    javascript.playBgMusic();
+    javascript.playSound("bg");
     bgMusicPlaying = true;
   }
-
 
   /* Resets draw screen */
   background(OUT_OF_BOUNDS_COLOR);
@@ -144,13 +154,7 @@ public void gameOverScreen() {
   fill(255,0,0);
   textAlign(CENTER);
   text("YOU DIED",width/2, height/2);
-  text("Press any key to try again",width/2, height/2+20);
-  /*
-  if(keyPressed || mousePressed) {
-    myShip.setCurrentHealth(myShip.getMaxHealth()); // Shouldn't be neccessary after changing some stuff
-    gameState = 0; // When pressed, it only goes to gamestate 0 for a short time then goes to gamestate 1
-  }
-  */
+  text("Press p to play again",width/2, height/2+20);
 }
 
 public void creditsScreen() {
@@ -178,6 +182,20 @@ public void keyPressed() {
       } break;
     case ' ':
       keys.put(" ", true);
+      break;
+    case 'p':
+      if(gameState == 3) {
+        gameState = 0;
+      } else if (gameState == 0) {
+        gameState = 1;
+      }
+      break;
+    case 'p':
+      if(gameState == 3) {
+        gameState = 0;
+      } else if (gameState == 0) {
+        gameState = 1;
+      }
       break;
   }
 }

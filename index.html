@@ -7,10 +7,10 @@
 		<script src="processing.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/buzz/1.2.0/buzz.min.js"></script>
 		<script type="text/javascript">
-			var bg = new buzz.sound("bg",{formats:["mp3"]});
+			var bg = new buzz.sound("bg",{formats:["mp3"],loop:true});
+			var title = new buzz.sound("title",{formats:["mp3"],loop:true});
 
 			var bound = false;
-
 			function bindJavascript() {
 				var pjs = Processing.getInstanceById("AsteroidsGame");
 				if(pjs!=null) {
@@ -21,19 +21,25 @@
 			}
 			bindJavascript();
 
-			function playBgMusic() {
-				bg.play();
+			function playSound(s) {
+				switch(s) {
+					case "bg":
+						buzz.all().stop();
+						bg.loop().play();
+						break;
+				}
+
 			}
+
 		</script>
 	</head>
 	<body>
-		<header>
-			<h1>Asteroids and More</h1>
-		</header>
 			<section id="content">
-				<canvas id="AsteroidsGame" data-processing-sources="AsteroidsGame.pde Asteroid.pde Floater.pde SpaceShip.pde Star.pde Bullet.pde Camera.pde MiniMap.pde MyShip.pde">
-				</canvas>
+				<canvas id="AsteroidsGame" data-processing-sources="AsteroidsGame.pde Asteroid.pde Floater.pde SpaceShip.pde Star.pde Bullet.pde Camera.pde MiniMap.pde MyShip.pde"></canvas>
 		    </section>
+			<header>
+				<h1>Asteroids and More</h1>
+			</header>
 	    <footer>
 				<br /><br />
 		    Dev: Brandon Lou for Lowell HS' AP Computer Science class.

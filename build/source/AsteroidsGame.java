@@ -14,8 +14,6 @@ import java.io.IOException;
 
 public class AsteroidsGame extends PApplet {
 
-//import processing.sound.*;
-
 /* Constant variables */
 public final int NUM_STARS = 2000;
 public final double MY_SHIP_ACCELERATION = 0.1f;
@@ -33,7 +31,7 @@ public int score = 0;
 public int asteroidsDestroyed = 0;
 public int bulletsShot = 0;
 public int enemiesDestroyed = 0;
-public boolean backgroundMusicPlaying = false;
+public boolean bgMusicPlaying = false;
 
 /* Object variables */
 public MyShip myShip;
@@ -44,16 +42,14 @@ public ArrayList<Asteroid> asteroids = new ArrayList<Asteroid>();
 public ArrayList<Bullet> bullets = new ArrayList<Bullet>();
 public Camera camera;
 public MiniMap minimap;
-//public SoundFile backgroundMusic;
-//public SoundFile soundEffect;
 
 /* Your ship variables */
 
 /* Other variables */
 public HashMap<String,Boolean> keys = new HashMap<String,Boolean>();
+
 interface JavaScript {
-  public void playBackgroundMusic();
-  public void playSoundEffect();
+  public void playBgMusic();
 }
 public void bindJavascript(JavaScript js) {
   javascript = js;
@@ -71,7 +67,6 @@ public void setup() {
   keys.put("s", false);
   keys.put("a", false);
   keys.put("d", false);
-  keys.put("q", false);
   keys.put("q", false);
   keys.put(" ", false);
 }
@@ -102,10 +97,10 @@ public void draw() {
 }
 
 public void titleScreen() {
-
   /* Initialize objects */
   myShip = new MyShip();
   camera = new Camera();
+  bullets.clear();
   for(int i = 0; i < NUM_STARS; i++) {
     if(stars.size() <= NUM_STARS) {
       stars.add(new Star());
@@ -119,16 +114,12 @@ public void titleScreen() {
       asteroids.add(new Asteroid(x,y));
     }
   }
-
   background(0);
   textSize(16);
   textAlign(CENTER);
   fill(255);
   text("Asteroids and some more", width/2,height/2);
-  text("Press any key to start", width/2, height/2+20);
-  if(keyPressed || mousePressed) {
-    gameState = 1;
-  }
+  text("Press ENTER to start", width/2, height/2+20);
 }
 
 public void gameScreen() {
@@ -137,13 +128,11 @@ public void gameScreen() {
   camera.draw(myShip);
 
   /* Background music */
-  /*
-  if(backgroundMusicPlaying == false) {
-    backgroundMusic = new SoundFile(this,"bg.mp3");
-    backgroundMusic.play();
-    backgroundMusicPlaying = true;
+  if(bgMusicPlaying == false) {
+    //javascript.playBgMusic();
+    bgMusicPlaying = true;
   }
-  */
+
 
   /* Resets draw screen */
   background(OUT_OF_BOUNDS_COLOR);
@@ -167,13 +156,7 @@ public void gameOverScreen() {
   fill(255,0,0);
   textAlign(CENTER);
   text("YOU DIED",width/2, height/2);
-  text("Press any key to try again",width/2, height/2+20);
-  /*
-  if(keyPressed || mousePressed) {
-    myShip.setCurrentHealth(myShip.getMaxHealth()); // Shouldn't be neccessary after changing some stuff
-    gameState = 0; // When pressed, it only goes to gamestate 0 for a short time then goes to gamestate 1
-  }
-  */
+  text("Press ENTER to play again",width/2, height/2+20);
 }
 
 public void creditsScreen() {
@@ -201,6 +184,20 @@ public void keyPressed() {
       } break;
     case ' ':
       keys.put(" ", true);
+      break;
+    case ENTER:
+      if(gameState == 3) {
+        gameState = 0;
+      } else if (gameState == 0) {
+        gameState = 1;
+      }
+      break;
+    case RETURN:
+      if(gameState == 3) {
+        gameState = 0;
+      } else if (gameState == 0) {
+        gameState = 1;
+      }
       break;
   }
 }
