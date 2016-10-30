@@ -12,27 +12,37 @@ public class Asteroid extends Floater {
     strokeColor = color(255,127,80);
     fillColor = color(0,0,0);
     rotationSpeed = (int)(Math.random()*8-4);
-    myDirectionX = (double)(Math.random()*6-3);
-    myDirectionY = (double)(Math.random()*3);
 
     /* 4 cases for asteroids to spawn in */
     int startPos = (int)(Math.random()*4+1);
     switch (startPos) {
       case 1:
+        System.out.println("top");
         myCenterX = (int)(Math.random()*MAP_WIDTH);
         myCenterY = 0;
+        myDirectionX = (double)(Math.random()*6-3);
+        myDirectionY = (double)(Math.random()*3+1);
         break;
       case 2:
+        System.out.println("bottom");
         myCenterX = (int)(Math.random()*MAP_WIDTH);
         myCenterY = MAP_HEIGHT;
+        myDirectionX = (double)(Math.random()*6-3);
+        myDirectionY = (double)-(Math.random()*3+1);
         break;
       case 3:
+        System.out.println("left");
         myCenterX = 0;
         myCenterY = (int)(Math.random()*MAP_HEIGHT);
+        myDirectionX = (double)(Math.random()*3+1);
+        myDirectionY = (double)(Math.random()*6-1);
         break;
       case 4:
+        System.out.println("right");
         myCenterX = MAP_WIDTH;
         myCenterY = (int)(Math.random()*MAP_HEIGHT);
+        myDirectionX = (double)-(Math.random()*6);
+        myDirectionY = (double)(Math.random()*6-3);
         break;
     }
   }

@@ -23,9 +23,9 @@ public final int displayHeight = 700;
 /* Game variables */
 public int gameState = 0; // Prod: 0, Dev: 1
 public int score;
-public int asteroidsDestroyed = 0;
-public int bulletsShot = 0;
-public int enemiesDestroyed = 0;
+public int asteroidsDestroyed;
+public int bulletsShot;
+public int enemiesDestroyed;
 public boolean titleMusicPlaying = false;
 public boolean bgMusicPlaying = false;
 
@@ -90,6 +90,9 @@ public void titleScreen() {
   camera = new Camera();
   bullets.clear();
   score = 0;
+  asteroidsDestroyed = 0;
+  bulletsShot = 0;
+  enemiesDestroyed = 0;
   for(int i = 0; i < NUM_STARS; i++) {
     if(stars.size() <= NUM_STARS) {
       stars.add(new Star());
@@ -108,8 +111,9 @@ public void titleScreen() {
   textSize(16);
   textAlign(CENTER);
   fill(255);
-  text("Asteroids and some more", width/2,height/2);
-  text("Press p to start", width/2, height/2+20);
+  textSize(32);
+  text("Asteroids and more", width/2,height/2-40);
+  text("Press p to start", width/2, height/2);
 
   /* Background music */
   if(titleMusicPlaying == false && javascript != null) {
@@ -149,10 +153,15 @@ public void gameScreen() {
 public void pauseScreen() {
 }
 public void gameOverScreen() {
-  // Dissapear ship
+  /* Explode!!! */
+  myShip.dissapear();
   // Explosion animation
-  fill(255,0,0);
+
+  /* Game over prompt */
+  stroke(255,0,0);
+  fill(255,255,255);
   textAlign(CENTER);
+  textSize(24);
   text("YOU DIED",width/2, height/2);
   text("Press p to play again",width/2, height/2+20);
 }
@@ -182,13 +191,6 @@ public void keyPressed() {
       } break;
     case ' ':
       keys.put(" ", true);
-      break;
-    case 'p':
-      if(gameState == 3) {
-        gameState = 0;
-      } else if (gameState == 0) {
-        gameState = 1;
-      }
       break;
     case 'p':
       if(gameState == 3) {
@@ -285,10 +287,13 @@ public void updateCollisions() {
     /* Remove asteroid if it's out of the screen or if it hits a ship */
     if(asteroids.get(a).getX() > MAP_WIDTH || asteroids.get(a).getX() < 0 || asteroids.get(a).getY() > MAP_HEIGHT || asteroids.get(a).getY() < 0 || asteroids.get(a).getRotationSpeed() == 0) {
       asteroids.remove(a);
+      //asteroid explosion
     } else if (dist(asteroids.get(a).getX(), asteroids.get(a).getY(),myShip.getX(), myShip.getY()) < 20) {
       /* If asteroid hits your ship, GAME OVER */
       asteroids.remove(a);
       myShip.setCurrentHealth(0);
+      myShip.setCurrentFuel(0);
+      myShip.setCurrentHeat(0);
       gameState = 3;
     }
   }
@@ -311,12 +316,15 @@ public void updateCollisions() {
   /* Reduce health if out of bounds */
   if(myShip.getX() < 0 || myShip.getX() > MAP_WIDTH || myShip.getY() < 0 || myShip.getY() > MAP_HEIGHT) {
     myShip.setCurrentHealth(myShip.getCurrentHealth()-0.05);
+    if(myShip.getCurrentHealth()<=0){myShip.setCurrentFuel(0);myShip.setCurrentHeat(0);}
   }
   /* Cool down ship */
   myShip.setCurrentHeat(myShip.getCurrentHeat()-0.1);
   /* Over heat ends life */
   if(myShip.getCurrentHeat() >= myShip.getMaxHeat()) {
+    bullets.clear();
     myShip.setCurrentHealth(0);
+    myShip.setCurrentFuel(0);
   }
 }
 
@@ -324,6 +332,7 @@ public void updateCollisions() {
 public void showGUI() {
 
   minimap.render();
+  textSize(15);
 
   /* Draw gray sidebar */
   stroke(255);

@@ -14,6 +14,17 @@ import java.io.IOException;
 
 public class AsteroidsGame extends PApplet {
 
+// TODO: get enter/return key working on browser
+
+/* Connect processing with browser js */
+public interface JavaScript {
+  public void playSound(String s);
+}
+public void bindJavascript(JavaScript js) {
+  javascript = js;
+}
+public JavaScript javascript;
+
 /* Constant variables */
 public final int NUM_STARS = 2000;
 public final double MY_SHIP_ACCELERATION = 0.1f;
@@ -27,10 +38,11 @@ public final int displayHeight = 700;
 
 /* Game variables */
 public int gameState = 0; // Prod: 0, Dev: 1
-public int score = 0;
-public int asteroidsDestroyed = 0;
-public int bulletsShot = 0;
-public int enemiesDestroyed = 0;
+public int score;
+public int asteroidsDestroyed;
+public int bulletsShot;
+public int enemiesDestroyed;
+public boolean titleMusicPlaying = false;
 public boolean bgMusicPlaying = false;
 
 /* Object variables */
@@ -47,14 +59,6 @@ public MiniMap minimap;
 
 /* Other variables */
 public HashMap<String,Boolean> keys = new HashMap<String,Boolean>();
-
-interface JavaScript {
-  public void playBgMusic();
-}
-public void bindJavascript(JavaScript js) {
-  javascript = js;
-}
-JavaScript javascript;
 
 public void setup() {
   /* Set screen size, framerate */
@@ -101,6 +105,10 @@ public void titleScreen() {
   myShip = new MyShip();
   camera = new Camera();
   bullets.clear();
+  score = 0;
+  asteroidsDestroyed = 0;
+  bulletsShot = 0;
+  enemiesDestroyed = 0;
   for(int i = 0; i < NUM_STARS; i++) {
     if(stars.size() <= NUM_STARS) {
       stars.add(new Star());
@@ -114,12 +122,22 @@ public void titleScreen() {
       asteroids.add(new Asteroid(x,y));
     }
   }
+
   background(0);
   textSize(16);
   textAlign(CENTER);
   fill(255);
-  text("Asteroids and some more", width/2,height/2);
-  text("Press ENTER to start", width/2, height/2+20);
+  textSize(32);
+  text("Asteroids and more", width/2,height/2-40);
+  text("Press p to start", width/2, height/2);
+
+  /* Background music */
+  if(titleMusicPlaying == false && javascript != null) {
+    javascript.playSound("title");
+    titleMusicPlaying = true;
+    bgMusicPlaying = false;
+  }
+
 }
 
 public void gameScreen() {
@@ -128,11 +146,11 @@ public void gameScreen() {
   camera.draw(myShip);
 
   /* Background music */
-  if(bgMusicPlaying == false) {
-    //javascript.playBgMusic();
+  if(bgMusicPlaying == false && javascript != null) {
+    javascript.playSound("bg");
     bgMusicPlaying = true;
+    titleMusicPlaying = false;
   }
-
 
   /* Resets draw screen */
   background(OUT_OF_BOUNDS_COLOR);
@@ -151,12 +169,17 @@ public void gameScreen() {
 public void pauseScreen() {
 }
 public void gameOverScreen() {
-  // Dissapear ship
+  /* Explode!!! */
+  myShip.dissapear();
   // Explosion animation
-  fill(255,0,0);
+
+  /* Game over prompt */
+  stroke(255,0,0);
+  fill(255,255,255);
   textAlign(CENTER);
+  textSize(24);
   text("YOU DIED",width/2, height/2);
-  text("Press ENTER to play again",width/2, height/2+20);
+  text("Press p to play again",width/2, height/2+20);
 }
 
 public void creditsScreen() {
@@ -185,14 +208,7 @@ public void keyPressed() {
     case ' ':
       keys.put(" ", true);
       break;
-    case ENTER:
-      if(gameState == 3) {
-        gameState = 0;
-      } else if (gameState == 0) {
-        gameState = 1;
-      }
-      break;
-    case RETURN:
+    case 'p':
       if(gameState == 3) {
         gameState = 0;
       } else if (gameState == 0) {
@@ -287,10 +303,13 @@ public void updateCollisions() {
     /* Remove asteroid if it's out of the screen or if it hits a ship */
     if(asteroids.get(a).getX() > MAP_WIDTH || asteroids.get(a).getX() < 0 || asteroids.get(a).getY() > MAP_HEIGHT || asteroids.get(a).getY() < 0 || asteroids.get(a).getRotationSpeed() == 0) {
       asteroids.remove(a);
+      //asteroid explosion
     } else if (dist(asteroids.get(a).getX(), asteroids.get(a).getY(),myShip.getX(), myShip.getY()) < 20) {
       /* If asteroid hits your ship, GAME OVER */
       asteroids.remove(a);
       myShip.setCurrentHealth(0);
+      myShip.setCurrentFuel(0);
+      myShip.setCurrentHeat(0);
       gameState = 3;
     }
   }
@@ -313,12 +332,15 @@ public void updateCollisions() {
   /* Reduce health if out of bounds */
   if(myShip.getX() < 0 || myShip.getX() > MAP_WIDTH || myShip.getY() < 0 || myShip.getY() > MAP_HEIGHT) {
     myShip.setCurrentHealth(myShip.getCurrentHealth()-0.05f);
+    if(myShip.getCurrentHealth()<=0){myShip.setCurrentFuel(0);myShip.setCurrentHeat(0);}
   }
   /* Cool down ship */
   myShip.setCurrentHeat(myShip.getCurrentHeat()-0.1f);
   /* Over heat ends life */
   if(myShip.getCurrentHeat() >= myShip.getMaxHeat()) {
+    bullets.clear();
     myShip.setCurrentHealth(0);
+    myShip.setCurrentFuel(0);
   }
 }
 
@@ -326,6 +348,7 @@ public void updateCollisions() {
 public void showGUI() {
 
   minimap.render();
+  textSize(15);
 
   /* Draw gray sidebar */
   stroke(255);
@@ -400,27 +423,37 @@ public class Asteroid extends Floater {
     strokeColor = color(255,127,80);
     fillColor = color(0,0,0);
     rotationSpeed = (int)(Math.random()*8-4);
-    myDirectionX = (double)(Math.random()*6-3);
-    myDirectionY = (double)(Math.random()*3);
 
     /* 4 cases for asteroids to spawn in */
     int startPos = (int)(Math.random()*4+1);
     switch (startPos) {
       case 1:
+        System.out.println("top");
         myCenterX = (int)(Math.random()*MAP_WIDTH);
         myCenterY = 0;
+        myDirectionX = (double)(Math.random()*6-3);
+        myDirectionY = (double)(Math.random()*3+1);
         break;
       case 2:
+        System.out.println("bottom");
         myCenterX = (int)(Math.random()*MAP_WIDTH);
         myCenterY = MAP_HEIGHT;
+        myDirectionX = (double)(Math.random()*6-3);
+        myDirectionY = (double)-(Math.random()*3+1);
         break;
       case 3:
+        System.out.println("left");
         myCenterX = 0;
         myCenterY = (int)(Math.random()*MAP_HEIGHT);
+        myDirectionX = (double)(Math.random()*3+1);
+        myDirectionY = (double)(Math.random()*6-1);
         break;
       case 4:
+        System.out.println("right");
         myCenterX = MAP_WIDTH;
         myCenterY = (int)(Math.random()*MAP_HEIGHT);
+        myDirectionX = (double)-(Math.random()*6);
+        myDirectionY = (double)(Math.random()*6-3);
         break;
     }
   }
@@ -632,7 +665,6 @@ public class MyShip extends SpaceShip {
     currentHeat = 0;
     MAX_VELOCITY = 5;
   }
-
   public double getMaxHealth(){return maxHealth;}
   public double getCurrentHealth(){return currentHealth;}
   public void setMaxHealth(double health){maxHealth = health;}
@@ -650,14 +682,23 @@ public class MyShip extends SpaceShip {
       currentHeat = 0;
     }
   }
-
   public void hyperspace() {
-    myCenterX = (int)(Math.random()*MAP_WIDTH);
-    myCenterY = (int)(Math.random()*MAP_HEIGHT);
-    myDirectionX = 0;
-    myDirectionY = 0;
-    myPointDirection = (int)(Math.random()*360);
-    currentFuel -= 10;
+    if(currentFuel > 10) {
+      myCenterX = (int)(Math.random()*MAP_WIDTH);
+      myCenterY = (int)(Math.random()*MAP_HEIGHT);
+      myDirectionX = 0;
+      myDirectionY = 0;
+      myPointDirection = (int)(Math.random()*360);
+      currentFuel -= 10;
+    }
+  }
+  public void dissapear() {
+    corners=0;
+    int[] xC = {};
+    int[] yC = {};
+    xCorners = xC;
+    yCorners = yC;
+    show();
   }
 }
 public abstract class SpaceShip extends Floater {

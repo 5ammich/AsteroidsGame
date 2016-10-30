@@ -23,7 +23,6 @@ public class MyShip extends SpaceShip {
     currentHeat = 0;
     MAX_VELOCITY = 5;
   }
-
   public double getMaxHealth(){return maxHealth;}
   public double getCurrentHealth(){return currentHealth;}
   public void setMaxHealth(double health){maxHealth = health;}
@@ -41,13 +40,22 @@ public class MyShip extends SpaceShip {
       currentHeat = 0;
     }
   }
-
   public void hyperspace() {
-    myCenterX = (int)(Math.random()*MAP_WIDTH);
-    myCenterY = (int)(Math.random()*MAP_HEIGHT);
-    myDirectionX = 0;
-    myDirectionY = 0;
-    myPointDirection = (int)(Math.random()*360);
-    currentFuel -= 10;
+    if(currentFuel > 10) {
+      myCenterX = (int)(Math.random()*MAP_WIDTH);
+      myCenterY = (int)(Math.random()*MAP_HEIGHT);
+      myDirectionX = 0;
+      myDirectionY = 0;
+      myPointDirection = (int)(Math.random()*360);
+      currentFuel -= 10;
+    }
+  }
+  public void dissapear() {
+    corners=0;
+    int[] xC = {};
+    int[] yC = {};
+    xCorners = xC;
+    yCorners = yC;
+    show();
   }
 }

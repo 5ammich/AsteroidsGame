@@ -23,13 +23,13 @@
 
 			function playSound(s) {
 				switch(s) {
-					case "bg":
-						buzz.all().stop();
-						bg.loop().play();
-						break;
 					case "title":
 						buzz.all().stop();
 						title.loop().play().fadeIn();
+						break;
+					case "bg":
+						buzz.all().stop();
+						bg.loop().play();
 						break;
 				}
 			}
@@ -44,8 +44,10 @@
 				<h1>Asteroids and More</h1>
 			</header>
 	    <footer>
-				<br /><br />
-		    Dev: Brandon Lou for Lowell HS' AP Computer Science class.
+				<br />
+				W to accelerate. S to negatively accelerate. A to turn left. D to turn right. Q to hyperspace. SPACE to fire bullets. P to start and restart *ENTER doesn't work for some reason :/
+				<br />
+				Dev: Brandon Lou for Lowell HS' AP Computer Science class.
 	    </footer>
 	</body>
 </html>
