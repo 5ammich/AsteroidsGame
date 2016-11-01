@@ -1,6 +1,6 @@
 // TODO
 // get enter/return key working on browser (bad fix: using key p rt now)
-// Enemy bullets, health
+// Enemy health
 // Ally ships
 // Help
 // E to go warp speed
@@ -24,7 +24,7 @@ public JavaScript javascript;
 public final int NUM_STARS = 2000;
 public final double MY_SHIP_ACCELERATION = 0.1;
 public final double ASTEROID_SPAWN_CHANCE = 10;
-public final int MAX_ASTEROIDS = 25;
+public final int MAX_ASTEROIDS = 20;
 public final int INITIAL_ENEMIES = 5;
 public final int MAP_WIDTH = 5000;
 public final int MAP_HEIGHT = 5000;
@@ -50,8 +50,6 @@ public ArrayList<Asteroid> asteroids = new ArrayList<Asteroid>();
 public ArrayList<Bullet> bullets = new ArrayList<Bullet>();
 public Camera camera;
 public MiniMap minimap;
-
-/* Your ship variables */
 
 /* Other variables */
 public HashMap<String,Boolean> keys = new HashMap<String,Boolean>();
@@ -148,7 +146,6 @@ public void titleScreen() {
     titleMusicPlaying = true;
     bgMusicPlaying = false;
   }
-
 }
 
 public void gameScreen() {
@@ -279,7 +276,7 @@ public void checkKeyValues() {
     myShip.rotate(3);
   }
   if (keys.get(" ") == true) {
-      bullets.add(new Bullet(myShip,"friendly"));
+      bullets.add(new Bullet(myShip,"mine"));
       myShip.setCurrentHeat(myShip.getCurrentHeat()+0.5);
       bulletsShot++;
       myShip.recoil();
@@ -290,6 +287,9 @@ public void showEnemyShips() {
   for(int e = enemyShips.size()-1; e >= 0; e--) {
     enemyShips.get(e).move();
     enemyShips.get(e).show();
+    if (dist(enemyShips.get(e).getX(), enemyShips.get(e).getY(), myShip.getX(), myShip.getY()) <= 1000 && (int)(Math.random()*10) == 0) {
+      bullets.add(new Bullet(enemyShips.get(e), "enemy"));
+    }
   }
 }
 
@@ -335,13 +335,22 @@ public void updateCollisions() {
     if(asteroids.get(a).getX() > MAP_WIDTH || asteroids.get(a).getX() < 0 || asteroids.get(a).getY() > MAP_HEIGHT || asteroids.get(a).getY() < 0 || asteroids.get(a).getRotationSpeed() == 0) {
       asteroids.remove(a);
       //asteroid explosion
-    } else if (dist(asteroids.get(a).getX(), asteroids.get(a).getY(),myShip.getX(), myShip.getY()) < 20) {
+    } else if (dist(asteroids.get(a).getX(), asteroids.get(a).getY(),myShip.getX(), myShip.getY()) <= 20) {
       /* If asteroid hits your ship, GAME OVER */
       asteroids.remove(a);
       myShip.setCurrentHealth(0);
       myShip.setCurrentFuel(0);
       myShip.setCurrentHeat(0);
       gameState = 3;
+    } else {
+      /* Loops through all enemyships */
+      for(int e = enemyShips.size() - 1; e >= 0; e--) {
+        /* Remove asteroid and enemyship if they collide */
+        if(dist(asteroids.get(a).getX(), asteroids.get(a).getY(),enemyShips.get(e).getX(), enemyShips.get(e).getY()) <= 20) {
+          enemyShips.remove(e);
+          asteroids.remove(a);
+        }
+      }
     }
   }
   /* Loops through each bullet */
@@ -349,13 +358,26 @@ public void updateCollisions() {
     /* Remove bullet if it's out of the screen or if it hits an asteroid */
     if(bullets.get(b).getX() > MAP_WIDTH || bullets.get(b).getX() < 0 || bullets.get(b).getY() > MAP_HEIGHT || bullets.get(b).getY() < 0) {
       bullets.remove(b);
+    } else if(dist(bullets.get(b).getX(), bullets.get(b).getY(), myShip.getX(), myShip.getY()) <= 20 && bullets.get(b).getType() == "enemy") {
+      /* Remove bullet and reduce your ship health */
+      bullets.remove(b);
+      myShip.setCurrentHealth(myShip.getCurrentHealth()-0.5);
     } else {
       for (int a = asteroids.size()-2; a >= 0; a--) {
+        /* Remove bullet and asteroid */
         if (dist(asteroids.get(a).getX(), asteroids.get(a).getY(),bullets.get(b).getX(), bullets.get(b).getY()) < 20) {
           bullets.remove(b);
           asteroids.remove(a);
-          asteroidsDestroyed++;
-          score++;
+          if(bullets.get(b).getType() == "mine") {
+            asteroidsDestroyed++;
+            score++;
+          }
+        }
+      }
+      for(int e = enemyShips.size() - 1; e >= 0; e--) {
+        if(dist(bullets.get(b).getX(), bullets.get(b).getY(), enemyShips.get(e).getX(), enemyShips.get(e).getY()) <= 20) {
+          bullets.remove(e);
+          enemyShips.get(e).setCurrentHealth(enemyShips.get(e).getCurrentHealth() - 1);
         }
       }
     }
@@ -372,6 +394,11 @@ public void updateCollisions() {
     bullets.clear();
     myShip.setCurrentHealth(0);
     myShip.setCurrentFuel(0);
+  }
+  for(int e = enemyShips.getSize() - 1; e >= 0; e--) {
+    if (enemyShips.get(e).getCurrentHealth() <= 0) {
+      enemyShips.remove(e);
+    }
   }
 }
 

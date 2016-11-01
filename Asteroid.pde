@@ -72,9 +72,8 @@ public class Asteroid extends Floater {
   public int getRotationSpeed(){return rotationSpeed;}
 
   public void move() {
-    myCenterX += myDirectionX;
-    myCenterY += myDirectionY;
-    myPointDirection += rotationSpeed;
+    super.move();
+    rotate(rotationSpeed);
   }
 
 }

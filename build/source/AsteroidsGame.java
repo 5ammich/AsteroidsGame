@@ -16,8 +16,10 @@ public class AsteroidsGame extends PApplet {
 
 // TODO
 // get enter/return key working on browser (bad fix: using key p rt now)
-// Enemy/Ally ships
+// Enemy health
+// Ally ships
 // Help
+// E to go warp speed
 // Spacestation
 // Objectives
 // Methods to get better stats
@@ -38,7 +40,7 @@ public JavaScript javascript;
 public final int NUM_STARS = 2000;
 public final double MY_SHIP_ACCELERATION = 0.1f;
 public final double ASTEROID_SPAWN_CHANCE = 10;
-public final int MAX_ASTEROIDS = 25;
+public final int MAX_ASTEROIDS = 20;
 public final int INITIAL_ENEMIES = 5;
 public final int MAP_WIDTH = 5000;
 public final int MAP_HEIGHT = 5000;
@@ -64,8 +66,6 @@ public ArrayList<Asteroid> asteroids = new ArrayList<Asteroid>();
 public ArrayList<Bullet> bullets = new ArrayList<Bullet>();
 public Camera camera;
 public MiniMap minimap;
-
-/* Your ship variables */
 
 /* Other variables */
 public HashMap<String,Boolean> keys = new HashMap<String,Boolean>();
@@ -141,8 +141,6 @@ public void titleScreen() {
     }
   }
 
-
-
   /* Reset game variables */
   score = 0;
   asteroidsDestroyed = 0;
@@ -164,7 +162,6 @@ public void titleScreen() {
     titleMusicPlaying = true;
     bgMusicPlaying = false;
   }
-
 }
 
 public void gameScreen() {
@@ -295,7 +292,7 @@ public void checkKeyValues() {
     myShip.rotate(3);
   }
   if (keys.get(" ") == true) {
-      bullets.add(new Bullet(myShip,"friendly"));
+      bullets.add(new Bullet(myShip,"mine"));
       myShip.setCurrentHeat(myShip.getCurrentHeat()+0.5f);
       bulletsShot++;
       myShip.recoil();
@@ -306,6 +303,9 @@ public void showEnemyShips() {
   for(int e = enemyShips.size()-1; e >= 0; e--) {
     enemyShips.get(e).move();
     enemyShips.get(e).show();
+    if (dist(enemyShips.get(e).getX(), enemyShips.get(e).getY(), myShip.getX(), myShip.getY()) <= 1000 && (int)(Math.random()*10) == 0) {
+      bullets.add(new Bullet(enemyShips.get(e), "enemy"));
+    }
   }
 }
 
@@ -351,13 +351,22 @@ public void updateCollisions() {
     if(asteroids.get(a).getX() > MAP_WIDTH || asteroids.get(a).getX() < 0 || asteroids.get(a).getY() > MAP_HEIGHT || asteroids.get(a).getY() < 0 || asteroids.get(a).getRotationSpeed() == 0) {
       asteroids.remove(a);
       //asteroid explosion
-    } else if (dist(asteroids.get(a).getX(), asteroids.get(a).getY(),myShip.getX(), myShip.getY()) < 20) {
+    } else if (dist(asteroids.get(a).getX(), asteroids.get(a).getY(),myShip.getX(), myShip.getY()) <= 20) {
       /* If asteroid hits your ship, GAME OVER */
       asteroids.remove(a);
       myShip.setCurrentHealth(0);
       myShip.setCurrentFuel(0);
       myShip.setCurrentHeat(0);
       gameState = 3;
+    } else {
+      /* Loops through all enemyships */
+      for(int e = enemyShips.size() - 1; e >= 0; e--) {
+        /* Remove asteroid and enemyship if they collide */
+        if(dist(asteroids.get(a).getX(), asteroids.get(a).getY(),enemyShips.get(e).getX(), enemyShips.get(e).getY()) <= 20) {
+          enemyShips.remove(e);
+          asteroids.remove(a);
+        }
+      }
     }
   }
   /* Loops through each bullet */
@@ -365,13 +374,26 @@ public void updateCollisions() {
     /* Remove bullet if it's out of the screen or if it hits an asteroid */
     if(bullets.get(b).getX() > MAP_WIDTH || bullets.get(b).getX() < 0 || bullets.get(b).getY() > MAP_HEIGHT || bullets.get(b).getY() < 0) {
       bullets.remove(b);
+    } else if(dist(bullets.get(b).getX(), bullets.get(b).getY(), myShip.getX(), myShip.getY()) <= 20 && bullets.get(b).getType() == "enemy") {
+      /* Remove bullet and reduce your ship health */
+      bullets.remove(b);
+      myShip.setCurrentHealth(myShip.getCurrentHealth()-0.5f);
     } else {
       for (int a = asteroids.size()-2; a >= 0; a--) {
+        /* Remove bullet and asteroid */
         if (dist(asteroids.get(a).getX(), asteroids.get(a).getY(),bullets.get(b).getX(), bullets.get(b).getY()) < 20) {
           bullets.remove(b);
           asteroids.remove(a);
-          asteroidsDestroyed++;
-          score++;
+          if(bullets.get(b).getType() == "mine") {
+            asteroidsDestroyed++;
+            score++;
+          }
+        }
+      }
+      for(int e = enemyShips.size() - 1; e >= 0; e--) {
+        if(dist(bullets.get(b).getX(), bullets.get(b).getY(), enemyShips.get(e).getX(), enemyShips.get(e).getY()) <= 20) {
+          bullets.remove(e);
+          enemyShips.get(e).setCurrentHealth(enemyShips.get(e).getCurrentHealth() - 1);
         }
       }
     }
@@ -388,6 +410,11 @@ public void updateCollisions() {
     bullets.clear();
     myShip.setCurrentHealth(0);
     myShip.setCurrentFuel(0);
+  }
+  for(int e = enemyShips.getSize() - 1; e >= 0; e--) {
+    if (enemyShips.get(e).getCurrentHealth() <= 0) {
+      enemyShips.remove(e);
+    }
   }
 }
 
@@ -451,7 +478,7 @@ public void showGUI() {
   /* Pause */
   fill(255);
   textAlign(LEFT);
-  text("ESC to pause",myShip.getX()+450,myShip.getY()+325);
+  text("TAB to pause",myShip.getX()+450,myShip.getY()+325);
 }
 
 public boolean hasFuel() {
@@ -532,14 +559,14 @@ public class Asteroid extends Floater {
   public int getRotationSpeed(){return rotationSpeed;}
 
   public void move() {
-    myCenterX += myDirectionX;
-    myCenterY += myDirectionY;
-    myPointDirection += rotationSpeed;
+    super.move();
+    rotate(rotationSpeed);
   }
 
 }
 public class Bullet extends Floater {
-  public Bullet(SpaceShip ship, String type) {
+  private String type;
+  public Bullet(SpaceShip ship, String t) {
     corners = 4;
     int[] xC = {2,2,-2,-2};
     int[] yC = {1,-1,-1,1};
@@ -549,9 +576,10 @@ public class Bullet extends Floater {
     myCenterY = ship.getY();
     myPointDirection = ship.getPointDirection();
     double dRadians = myPointDirection * (Math.PI/180);
-    myDirectionX = 10 * Math.cos(dRadians) + ship.getDirectionX();
-    myDirectionY = 10 * Math.sin(dRadians) + ship.getDirectionY();
-    if(type == "friendly") {
+    myDirectionX = 20 * Math.cos(dRadians) + ship.getDirectionX();
+    myDirectionY = 20 * Math.sin(dRadians) + ship.getDirectionY();
+    type = t;
+    if(type == "mine" || type == "friendly") {
       fillColor = color(0,191,255);
       strokeColor = color(0,191,255);
     } else if (type == "enemy") {
@@ -559,7 +587,6 @@ public class Bullet extends Floater {
       strokeColor = color(255,0,0);
     }
   }
-
   public void setX(int x){myCenterX = x;}
   public int getX(){return (int)myCenterX;}
   public void setY(int y){myCenterY = y;}
@@ -570,6 +597,7 @@ public class Bullet extends Floater {
   public double getDirectionY(){return myDirectionY;}
   public void setPointDirection(int degrees){myPointDirection = degrees;}
   public double getPointDirection(){return myPointDirection;}
+  public String getType(){return type;}
 
   public void show() {
     fill(fillColor);
@@ -604,7 +632,7 @@ public class EnemyShip extends SpaceShip {
     int[] yC = {-4,-4,-12,-12,-2,0,2,12,12,4,4};
     xCorners = xC;
     yCorners = yC;
-    fillColor = color(255,0,0);
+    fillColor = color(150,0,0);
     strokeColor = color(255,255,255);
     myCenterX = (double)(Math.random()*500+4000);
     myCenterY = (double)(Math.random()*500+4000);
@@ -616,6 +644,9 @@ public class EnemyShip extends SpaceShip {
     MAX_VELOCITY = random(2.0f, 4.0f);
     ACCELERATION = random(0.01f, 0.05f);
   }
+
+  public double getCurrentHealth(){return currentHealth;}
+  public void setCurrentHealth(double ch){currentHealth = ch;}
 
   public void move() {
 

@@ -9,7 +9,7 @@ public class EnemyShip extends SpaceShip {
     int[] yC = {-4,-4,-12,-12,-2,0,2,12,12,4,4};
     xCorners = xC;
     yCorners = yC;
-    fillColor = color(255,0,0);
+    fillColor = color(150,0,0);
     strokeColor = color(255,255,255);
     myCenterX = (double)(Math.random()*500+4000);
     myCenterY = (double)(Math.random()*500+4000);
@@ -21,6 +21,9 @@ public class EnemyShip extends SpaceShip {
     MAX_VELOCITY = random(2.0, 4.0);
     ACCELERATION = random(0.01, 0.05);
   }
+
+  public double getCurrentHealth(){return currentHealth;}
+  public void setCurrentHealth(double ch){currentHealth = ch;}
 
   public void move() {
 
