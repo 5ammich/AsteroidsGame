@@ -7,22 +7,25 @@
 		<script src="processing.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/buzz/1.2.0/buzz.min.js"></script>
 		<script type="text/javascript">
+			/* song variables */
 			var bg = new buzz.sound("bg",{formats:["mp3"],loop:true});
 			var title = new buzz.sound("title",{formats:["mp3"],loop:true});
 
 			var bound = false;
 			function bindJavascript() {
+				/* bind to processing */
 				var pjs = Processing.getInstanceById("AsteroidsGame");
 				if(pjs!=null) {
 					pjs.bindJavascript(this);
 					bound = true;
 				}
+				/* If cannot find processing, repeat every 250 ms */
 				if(!bound) setTimeout(bindJavascript,250);
 			}
 			bindJavascript();
 
-			function playSound(s) {
-				switch(s) {
+			function playSound(song) {
+				switch(song) {
 					case "title":
 						buzz.all().stop();
 						title.loop().play().fadeIn();
@@ -33,19 +36,18 @@
 						break;
 				}
 			}
-
 		</script>
 	</head>
 	<body>
 			<section id="content">
-				<canvas id="AsteroidsGame" data-processing-sources="AsteroidsGame.pde Asteroid.pde Floater.pde SpaceShip.pde Star.pde Bullet.pde Camera.pde MiniMap.pde MyShip.pde"></canvas>
-		    </section>
+				<canvas id="AsteroidsGame" data-processing-sources="AsteroidsGame.pde Asteroid.pde Floater.pde SpaceShip.pde Star.pde Bullet.pde Camera.pde MiniMap.pde MyShip.pde EnemyShip.pde"></canvas>
+		  </section>
 			<header>
 				<h1>Asteroids and More</h1>
 			</header>
 	    <footer>
 				<br />
-				W to accelerate. S to negatively accelerate. A to turn left. D to turn right. Q to hyperspace. SPACE to fire bullets. P to start and restart *ENTER doesn't work for some reason :/
+				W to accelerate. S to negatively accelerate. A to turn left. D to turn right. Q to hyperspace. SPACE to fire bullets. P to start and restart *ENTER doesn't work for some reason :/ TAB to pause
 				<br />
 				Dev: Brandon Lou for Lowell HS' AP Computer Science class.
 	    </footer>

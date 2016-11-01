@@ -1,4 +1,15 @@
-// TODO: get enter/return key working on browser
+// TODO
+// get enter/return key working on browser (bad fix: using key p rt now)
+// Enemy bullets, health
+// Ally ships
+// Help
+// E to go warp speed
+// Spacestation
+// Objectives
+// Methods to get better stats
+// Game win! / Credits
+// Title screen graphics
+// Sound effects
 
 /* Connect processing with browser js */
 public interface JavaScript {
@@ -13,7 +24,8 @@ public JavaScript javascript;
 public final int NUM_STARS = 2000;
 public final double MY_SHIP_ACCELERATION = 0.1;
 public final double ASTEROID_SPAWN_CHANCE = 10;
-public final int MAX_ASTEROIDS = 50;
+public final int MAX_ASTEROIDS = 25;
+public final int INITIAL_ENEMIES = 5;
 public final int MAP_WIDTH = 5000;
 public final int MAP_HEIGHT = 5000;
 public final int OUT_OF_BOUNDS_COLOR = color(50,0,0);
@@ -21,7 +33,7 @@ public final int displayWidth = 1100;
 public final int displayHeight = 700;
 
 /* Game variables */
-public int gameState = 0; // Prod: 0, Dev: 1
+public int gameState = 0;
 public int score;
 public int asteroidsDestroyed;
 public int bulletsShot;
@@ -85,28 +97,43 @@ public void draw() {
 }
 
 public void titleScreen() {
+  /* Clear and reset arraylists */
+  bullets.clear();
+  enemyShips.clear();
+  asteroids.clear();
+  stars.clear();
+  allyShips.clear();
+
   /* Initialize objects */
   myShip = new MyShip();
   camera = new Camera();
-  bullets.clear();
-  score = 0;
-  asteroidsDestroyed = 0;
-  bulletsShot = 0;
-  enemiesDestroyed = 0;
+  minimap = new MiniMap();
+
   for(int i = 0; i < NUM_STARS; i++) {
     if(stars.size() <= NUM_STARS) {
       stars.add(new Star());
     }
   }
-  minimap = new MiniMap();
   for(int i = 0; i < MAX_ASTEROIDS; i++) {
-    if(asteroids.size() <= MAX_ASTEROIDS) {
+    if(asteroids.size() < MAX_ASTEROIDS) {
       int x = (int)(Math.random()*MAP_WIDTH);
       int y = (int)(Math.random()*MAP_HEIGHT);
       asteroids.add(new Asteroid(x,y));
     }
   }
+  for(int i = 0; i < INITIAL_ENEMIES; i++) {
+    if(enemyShips.size() < INITIAL_ENEMIES) {
+      enemyShips.add(new EnemyShip());
+    }
+  }
 
+  /* Reset game variables */
+  score = 0;
+  asteroidsDestroyed = 0;
+  bulletsShot = 0;
+  enemiesDestroyed = 0;
+
+  /* Prompt user */
   background(0);
   textSize(16);
   textAlign(CENTER);
@@ -115,7 +142,7 @@ public void titleScreen() {
   text("Asteroids and more", width/2,height/2-40);
   text("Press p to start", width/2, height/2);
 
-  /* Background music */
+  /* Title screen music */
   if(titleMusicPlaying == false && javascript != null) {
     javascript.playSound("title");
     titleMusicPlaying = true;
@@ -147,13 +174,19 @@ public void gameScreen() {
   showSpace();
   showAsteroids();
   showBullets();
+  showEnemyShips();
   showShip();
   showGUI();
 }
+
 public void pauseScreen() {
+  textSize(24);
+  fill(255);
+  text("Paused.",50,100);
 }
+
 public void gameOverScreen() {
-  /* Explode!!! */
+  /* Explode */
   myShip.dissapear();
   // Explosion animation
 
@@ -199,6 +232,13 @@ public void keyPressed() {
         gameState = 1;
       }
       break;
+    case TAB:
+      if(gameState == 1) {
+        gameState = 2;
+      } else if (gameState == 2) {
+        gameState = 1;
+      }
+      break;
   }
 }
 
@@ -222,6 +262,37 @@ public void keyReleased() {
   }
 }
 
+/* Runs through hashmap and moves ship accordingly */
+public void checkKeyValues() {
+  if (keys.get("w") == true && hasFuel()) {
+    myShip.accelerate(MY_SHIP_ACCELERATION);
+    myShip.setCurrentFuel(myShip.getCurrentFuel()-0.02);
+  }
+  if (keys.get("s") == true && hasFuel()) {
+    myShip.accelerate(-(MY_SHIP_ACCELERATION));
+    myShip.setCurrentFuel(myShip.getCurrentFuel()-0.02);
+  }
+  if (keys.get("a") == true) {
+    myShip.rotate(-3);
+  }
+  if (keys.get("d") == true) {
+    myShip.rotate(3);
+  }
+  if (keys.get(" ") == true) {
+      bullets.add(new Bullet(myShip,"friendly"));
+      myShip.setCurrentHeat(myShip.getCurrentHeat()+0.5);
+      bulletsShot++;
+      myShip.recoil();
+  }
+}
+
+public void showEnemyShips() {
+  for(int e = enemyShips.size()-1; e >= 0; e--) {
+    enemyShips.get(e).move();
+    enemyShips.get(e).show();
+  }
+}
+
 public void showAsteroids() {
   /* Randomly adds more asteroids */
   if ((int)(Math.random()*ASTEROID_SPAWN_CHANCE) == 0 && asteroids.size() <= MAX_ASTEROIDS) {
@@ -240,30 +311,6 @@ public void showSpace() {
   rect(0,0,MAP_WIDTH,MAP_HEIGHT);
   for(int i = 0; i < stars.size(); i++) {
     stars.get(i).show();
-  }
-}
-
-/* Runs through hashmap and moves ship accordingly */
-public void checkKeyValues() {
-  if (keys.get("w") == true && hasFuel()) {
-    myShip.accelerate(MY_SHIP_ACCELERATION);
-    myShip.setCurrentFuel(myShip.getCurrentFuel()-0.02);
-  }
-  if (keys.get("s") == true && hasFuel()) {
-    myShip.accelerate(-(MY_SHIP_ACCELERATION));
-    myShip.setCurrentFuel(myShip.getCurrentFuel()-0.02);
-  }
-  if (keys.get("a") == true) {
-    myShip.rotate(-3);
-  }
-  if (keys.get("d") == true) {
-    myShip.rotate(3);
-  }
-  if (keys.get(" ") == true) {
-      bullets.add(new Bullet(myShip));
-      myShip.setCurrentHeat(myShip.getCurrentHeat()+0.5);
-      bulletsShot++;
-      myShip.recoil();
   }
 }
 
@@ -382,11 +429,13 @@ public void showGUI() {
   fill(255);
   textAlign(LEFT);
   text("Score: " + score,myShip.getX()+450,myShip.getY()+40);
+
   /* Current objective */
+
   /* Pause */
   fill(255);
   textAlign(LEFT);
-  text("ESC to pause",myShip.getX()+450,myShip.getY()+325);
+  text("TAB to pause",myShip.getX()+450,myShip.getY()+325);
 }
 
 public boolean hasFuel() {

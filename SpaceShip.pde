@@ -1,6 +1,6 @@
 public abstract class SpaceShip extends Floater {
 
-  protected int MAX_VELOCITY;
+  protected double MAX_VELOCITY;
   protected final static double SHIP_RECOIL = -0.001;
 
   public void setX(int x){myCenterX = x;}
