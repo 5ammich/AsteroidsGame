@@ -1,12 +1,11 @@
 // TODO
 // get enter/return key working on browser (bad fix: using key p rt now)
-// Enemy health
 // Ally ships
 // Help
 // E to go warp speed
 // Spacestation
-// Objectives
 // Methods to get better stats
+// Objectives
 // Game win! / Credits
 // Title screen graphics
 // Sound effects
@@ -44,7 +43,7 @@ public boolean bgMusicPlaying = false;
 /* Object variables */
 public MyShip myShip;
 public ArrayList<SpaceShip> allyShips = new ArrayList<SpaceShip>();
-public ArrayList<SpaceShip> enemyShips = new ArrayList<SpaceShip>();
+public ArrayList<EnemyShip> enemyShips = new ArrayList<EnemyShip>();
 public ArrayList<Star> stars = new ArrayList<Star>();
 public ArrayList<Asteroid> asteroids = new ArrayList<Asteroid>();
 public ArrayList<Bullet> bullets = new ArrayList<Bullet>();
@@ -346,17 +345,19 @@ public void updateCollisions() {
       /* Loops through all enemyships */
       for(int e = enemyShips.size() - 1; e >= 0; e--) {
         /* Remove asteroid and enemyship if they collide */
+        /*
         if(dist(asteroids.get(a).getX(), asteroids.get(a).getY(),enemyShips.get(e).getX(), enemyShips.get(e).getY()) <= 20) {
           enemyShips.remove(e);
           asteroids.remove(a);
         }
+        */
       }
     }
   }
   /* Loops through each bullet */
   for(int b = bullets.size()-2; b >= 0; b--) {
     /* Remove bullet if it's out of the screen or if it hits an asteroid */
-    if(bullets.get(b).getX() > MAP_WIDTH || bullets.get(b).getX() < 0 || bullets.get(b).getY() > MAP_HEIGHT || bullets.get(b).getY() < 0) {
+    if(bullets.get(b).getX() > MAP_WIDTH || bullets.get(b).getX() < 0 || bullets.get(b).getY() > MAP_HEIGHT || bullets.get(b).getY() < 0 || dist(myShip.getX(), myShip.getY(), bullets.get(b).getX(), bullets.get(b).getY()) > 700) {
       bullets.remove(b);
     } else if(dist(bullets.get(b).getX(), bullets.get(b).getY(), myShip.getX(), myShip.getY()) <= 20 && bullets.get(b).getType() == "enemy") {
       /* Remove bullet and reduce your ship health */
@@ -374,14 +375,22 @@ public void updateCollisions() {
           }
         }
       }
-      for(int e = enemyShips.size() - 1; e >= 0; e--) {
+    }
+  }
+  /* Loop through enemy ships */
+  for(int e = enemyShips.size() - 2; e >= 0; e--) {
+    if (enemyShips.get(e).getCurrentHealth() <= 0) {
+      enemyShips.remove(e);
+    } else {
+      for(int b = bullets.size() - 2; b >= 0; b--) {
         if(dist(bullets.get(b).getX(), bullets.get(b).getY(), enemyShips.get(e).getX(), enemyShips.get(e).getY()) <= 20) {
-          bullets.remove(e);
-          enemyShips.get(e).setCurrentHealth(enemyShips.get(e).getCurrentHealth() - 1);
+          bullets.remove(b);
+          enemyShips.get(e).setCurrentHealth(enemyShips.get(e).getCurrentHealth()-0.5);
         }
       }
     }
   }
+
   /* Reduce health if out of bounds */
   if(myShip.getX() < 0 || myShip.getX() > MAP_WIDTH || myShip.getY() < 0 || myShip.getY() > MAP_HEIGHT) {
     myShip.setCurrentHealth(myShip.getCurrentHealth()-0.05);
@@ -394,11 +403,6 @@ public void updateCollisions() {
     bullets.clear();
     myShip.setCurrentHealth(0);
     myShip.setCurrentFuel(0);
-  }
-  for(int e = enemyShips.getSize() - 1; e >= 0; e--) {
-    if (enemyShips.get(e).getCurrentHealth() <= 0) {
-      enemyShips.remove(e);
-    }
   }
 }
 
