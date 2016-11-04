@@ -23,7 +23,7 @@ public class EnemyShip extends SpaceShip {
   }
 
   public double getCurrentHealth(){return currentHealth;}
-  public void setCurrentHealth(double ch){currentHealth = ch;}
+  public void setCurrentHealth(double ch){currentHealth += ch;}
 
   public void move() {
 

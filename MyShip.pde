@@ -15,8 +15,8 @@ public class MyShip extends SpaceShip {
     myDirectionX = 0;
     myDirectionY = 0;
     myPointDirection = 0;
-    maxHealth = 5;
-    currentHealth = 5;
+    maxHealth = 10;
+    currentHealth = 10;
     maxFuel = 100;
     currentFuel = 100;
     maxHeat = 50;

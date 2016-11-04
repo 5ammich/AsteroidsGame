@@ -29,6 +29,8 @@ public class AsteroidsGame extends PApplet {
 /* Connect processing with browser js */
 public interface JavaScript {
   public void playSound(String s);
+  public void enterKeyPressed();
+  public void escKeyPressed();
 }
 public void bindJavascript(JavaScript js) {
   javascript = js;
@@ -46,6 +48,7 @@ public final int MAP_HEIGHT = 5000;
 public final int OUT_OF_BOUNDS_COLOR = color(50,0,0);
 public final int displayWidth = 1100;
 public final int displayHeight = 700;
+public PImage spaceship;
 
 /* Game variables */
 public int gameState = 0;
@@ -82,6 +85,9 @@ public void setup() {
   keys.put("d", false);
   keys.put("q", false);
   keys.put(" ", false);
+
+  /* Initialize objects that WILL NOT change */
+  spaceship = loadImage("spaceship.png");
 }
 
 /* Manages gamestates */
@@ -148,12 +154,13 @@ public void titleScreen() {
 
   /* Prompt user */
   background(0);
+  image(spaceship,0,0);
   textSize(16);
   textAlign(CENTER);
   fill(255);
   textSize(32);
   text("Asteroids and more", width/2,height/2-40);
-  text("Press p to start", width/2, height/2);
+  text("ENTER to start", width/2, height/2);
 
   /* Title screen music */
   if(titleMusicPlaying == false && javascript != null) {
@@ -208,7 +215,7 @@ public void gameOverScreen() {
   textAlign(CENTER);
   textSize(24);
   text("YOU DIED",width/2, height/2);
-  text("Press p to play again",width/2, height/2+20);
+  text("ENTER to play again",width/2, height/2+20);
 }
 
 public void creditsScreen() {
@@ -237,13 +244,6 @@ public void keyPressed() {
     case ' ':
       keys.put(" ", true);
       break;
-    case 'p':
-      if(gameState == 3) {
-        gameState = 0;
-      } else if (gameState == 0) {
-        gameState = 1;
-      }
-      break;
     case TAB:
       if(gameState == 1) {
         gameState = 2;
@@ -251,6 +251,22 @@ public void keyPressed() {
         gameState = 1;
       }
       break;
+  }
+}
+
+public void enterKeyPressed() {
+  if(gameState == 3) {
+    gameState = 0;
+  } else if (gameState == 0) {
+    gameState = 1;
+  }
+}
+
+public void escKeyPressed() {
+  if(gameState == 1) {
+    gameState = 2;
+  } else if (gameState == 2) {
+    gameState = 1;
   }
 }
 
@@ -270,6 +286,13 @@ public void keyReleased() {
       break;
     case ' ':
       keys.put(" ", false);
+      break;
+    case ENTER:
+      if(gameState == 3) {
+        gameState = 0;
+      } else if (gameState == 0) {
+        gameState = 1;
+      }
       break;
   }
 }
@@ -394,14 +417,14 @@ public void updateCollisions() {
     }
   }
   /* Loop through enemy ships */
-  for(int e = enemyShips.size() - 2; e >= 0; e--) {
+  for(int e = enemyShips.size() - 1; e >= 0; e--) {
     if (enemyShips.get(e).getCurrentHealth() <= 0) {
       enemyShips.remove(e);
     } else {
-      for(int b = bullets.size() - 2; b >= 0; b--) {
-        if(dist(bullets.get(b).getX(), bullets.get(b).getY(), enemyShips.get(e).getX(), enemyShips.get(e).getY()) <= 20) {
+      for(int b = bullets.size() - 1; b >= 0; b--) {
+        if(dist(bullets.get(b).getX(), bullets.get(b).getY(), enemyShips.get(e).getX(), enemyShips.get(e).getY()) <= 20 && (bullets.get(b).getType() == "friendly" || bullets.get(b).getType() == "mine")) {
           bullets.remove(b);
-          enemyShips.get(e).setCurrentHealth(enemyShips.get(e).getCurrentHealth()-1);
+          enemyShips.get(e).setCurrentHealth(-0.5f);
         }
       }
     }
@@ -482,7 +505,7 @@ public void showGUI() {
   /* Pause */
   fill(255);
   textAlign(LEFT);
-  text("TAB to pause",myShip.getX()+450,myShip.getY()+325);
+  text("ESC to pause",myShip.getX()+450,myShip.getY()+325);
 }
 
 public boolean hasFuel() {
@@ -650,7 +673,7 @@ public class EnemyShip extends SpaceShip {
   }
 
   public double getCurrentHealth(){return currentHealth;}
-  public void setCurrentHealth(double ch){currentHealth = ch;}
+  public void setCurrentHealth(double ch){currentHealth += ch;}
 
   public void move() {
 
@@ -795,8 +818,8 @@ public class MyShip extends SpaceShip {
     myDirectionX = 0;
     myDirectionY = 0;
     myPointDirection = 0;
-    maxHealth = 5;
-    currentHealth = 5;
+    maxHealth = 10;
+    currentHealth = 10;
     maxFuel = 100;
     currentFuel = 100;
     maxHeat = 50;

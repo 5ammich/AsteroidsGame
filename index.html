@@ -6,15 +6,21 @@
 		<link rel="stylesheet" href="styles.css">
 		<script src="processing.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/buzz/1.2.0/buzz.min.js"></script>
+		<script
+	  src="https://code.jquery.com/jquery-3.1.1.min.js"
+	  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+	  crossorigin="anonymous">
+		</script>
 		<script type="text/javascript">
 			/* song variables */
 			var bg = new buzz.sound("bg",{formats:["mp3"],loop:true});
 			var title = new buzz.sound("title",{formats:["mp3"],loop:true});
 
+			var pjs;
 			var bound = false;
 			function bindJavascript() {
 				/* bind to processing */
-				var pjs = Processing.getInstanceById("AsteroidsGame");
+				pjs = Processing.getInstanceById("AsteroidsGame");
 				if(pjs!=null) {
 					pjs.bindJavascript(this);
 					bound = true;
@@ -36,6 +42,17 @@
 						break;
 				}
 			}
+
+			$(document).keyup(function(e) {
+				if(e.which == 13) {
+				  pjs.enterKeyPressed();
+				}
+			});
+			$(document).keyup(function(e) {
+				if(e.which == 27) {
+					pjs.escKeyPressed();
+				}
+			});
 		</script>
 	</head>
 	<body>
