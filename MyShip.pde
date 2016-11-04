@@ -26,7 +26,7 @@ public class MyShip extends SpaceShip {
   public double getMaxHealth(){return maxHealth;}
   public double getCurrentHealth(){return currentHealth;}
   public void setMaxHealth(double health){maxHealth = health;}
-  public void setCurrentHealth(double health){currentHealth = health;}
+  public void setCurrentHealth(double health){currentHealth += health;}
   public double getMaxFuel(){return maxFuel;}
   public double getCurrentFuel(){return currentFuel;}
   public void setMaxFuel(double mf){maxFuel = mf;}

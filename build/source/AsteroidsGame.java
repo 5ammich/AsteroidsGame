@@ -15,7 +15,6 @@ import java.io.IOException;
 public class AsteroidsGame extends PApplet {
 
 // TODO
-// get enter/return key working on browser (bad fix: using key p rt now)
 // Ally ships
 // Help
 // E to go warp speed
@@ -66,6 +65,8 @@ public ArrayList<EnemyShip> enemyShips = new ArrayList<EnemyShip>();
 public ArrayList<Star> stars = new ArrayList<Star>();
 public ArrayList<Asteroid> asteroids = new ArrayList<Asteroid>();
 public ArrayList<Bullet> bullets = new ArrayList<Bullet>();
+public Spacestation friendlySpacestation;
+public Spacestation enemySpacestation;
 public Camera camera;
 public MiniMap minimap;
 
@@ -88,6 +89,8 @@ public void setup() {
 
   /* Initialize objects that WILL NOT change */
   spaceship = loadImage("spaceship.png");
+  friendlySpacestation = new Spacestation("friendly");
+  enemySpacestation = new Spacestation("enemy");
 }
 
 /* Manages gamestates */
@@ -154,7 +157,10 @@ public void titleScreen() {
 
   /* Prompt user */
   background(0);
+
+  spaceship.resize(200,200);
   image(spaceship,0,0);
+
   textSize(16);
   textAlign(CENTER);
   fill(255);
@@ -193,6 +199,8 @@ public void gameScreen() {
   showSpace();
   showAsteroids();
   showBullets();
+  friendlySpacestation.show();
+  enemySpacestation.show();
   showEnemyShips();
   showShip();
   showGUI();
@@ -315,7 +323,7 @@ public void checkKeyValues() {
   }
   if (keys.get(" ") == true) {
       bullets.add(new Bullet(myShip,"mine"));
-      myShip.setCurrentHeat(myShip.getCurrentHeat()+0.5f);
+      myShip.setCurrentHeat(myShip.getCurrentHeat()+0.3f);
       bulletsShot++;
       myShip.recoil();
   }
@@ -897,6 +905,45 @@ public abstract class SpaceShip extends Floater {
 
   public void recoil() {
     accelerate(SHIP_RECOIL);
+  }
+}
+public class Spacestation {
+  private float x,y,radius;
+  private double currentHealth, maxHealth;
+  private String type;
+  private int fillColor, strokeColor;
+
+  public Spacestation(String t) {
+    this.currentHealth = 10;
+    this.maxHealth = 10;
+    this.type = t;
+    this.radius = 500;
+
+    if(type == "friendly") {
+      this.x = 750;
+      this.y = 750;
+      this.fillColor = color(0,0,0,0);
+      this.strokeColor = color(0,0,255);
+    } else if (type == "enemy") {
+      this.x = 4900;
+      this.y = 4900;
+      this.fillColor = color(0,0,0,0);
+      this.strokeColor = color(255,0,0);
+    }
+  }
+
+  public void show() {
+    fill(this.fillColor);
+    stroke(this.strokeColor);
+    ellipse(this.x, this.y, this.radius, this.radius);
+  }
+
+  public double getCurrentHealth() {
+    return this.currentHealth;
+  }
+
+  public void setCurrentHealth(double ch) {
+    this.currentHealth += ch;
   }
 }
 public class Star {

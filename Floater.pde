@@ -38,6 +38,7 @@ public abstract class Floater {
   }
   public void show()  //Draws the floater at the current position
   {
+    strokeWeight(1);
     fill(fillColor);
     stroke(strokeColor);
     //convert degrees to radians for sin and cos

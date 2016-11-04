@@ -1,5 +1,4 @@
 // TODO
-// get enter/return key working on browser (bad fix: using key p rt now)
 // Ally ships
 // Help
 // E to go warp speed
@@ -50,6 +49,8 @@ public ArrayList<EnemyShip> enemyShips = new ArrayList<EnemyShip>();
 public ArrayList<Star> stars = new ArrayList<Star>();
 public ArrayList<Asteroid> asteroids = new ArrayList<Asteroid>();
 public ArrayList<Bullet> bullets = new ArrayList<Bullet>();
+public Spacestation friendlySpacestation;
+public Spacestation enemySpacestation;
 public Camera camera;
 public MiniMap minimap;
 
@@ -72,6 +73,8 @@ public void setup() {
 
   /* Initialize objects that WILL NOT change */
   spaceship = loadImage("spaceship.png");
+  friendlySpacestation = new Spacestation("friendly");
+  enemySpacestation = new Spacestation("enemy");
 }
 
 /* Manages gamestates */
@@ -138,7 +141,10 @@ public void titleScreen() {
 
   /* Prompt user */
   background(0);
+
+  spaceship.resize(200,200);
   image(spaceship,0,0);
+
   textSize(16);
   textAlign(CENTER);
   fill(255);
@@ -176,6 +182,8 @@ public void gameScreen() {
   /* Show everything */
   showSpace();
   showAsteroids();
+  friendlySpacestation.show();
+  enemySpacestation.show();
   showBullets();
   showEnemyShips();
   showShip();
@@ -194,6 +202,7 @@ public void gameOverScreen() {
   // Explosion animation
 
   /* Game over prompt */
+  strokeWeight(1);
   stroke(255,0,0);
   fill(255,255,255);
   textAlign(CENTER);
@@ -299,7 +308,7 @@ public void checkKeyValues() {
   }
   if (keys.get(" ") == true) {
       bullets.add(new Bullet(myShip,"mine"));
-      myShip.setCurrentHeat(myShip.getCurrentHeat()+0.5);
+      myShip.setCurrentHeat(myShip.getCurrentHeat()+0.3);
       bulletsShot++;
       myShip.recoil();
   }
@@ -329,6 +338,7 @@ public void showAsteroids() {
 public void showSpace() {
   /* Draws black space rect and shows the stars */
   fill(0);
+  strokeWeight(1);
   stroke(0);
   rect(0,0,MAP_WIDTH,MAP_HEIGHT);
   for(int i = 0; i < stars.size(); i++) {
@@ -360,7 +370,7 @@ public void updateCollisions() {
     } else if (dist(asteroids.get(a).getX(), asteroids.get(a).getY(),myShip.getX(), myShip.getY()) <= 20) {
       /* If asteroid hits your ship, GAME OVER */
       asteroids.remove(a);
-      myShip.setCurrentHealth(0);
+      myShip.setCurrentHealth(-myShip.getCurrentHealth());
       myShip.setCurrentFuel(0);
       myShip.setCurrentHeat(0);
       gameState = 3;
@@ -385,7 +395,7 @@ public void updateCollisions() {
     } else if(dist(bullets.get(b).getX(), bullets.get(b).getY(), myShip.getX(), myShip.getY()) <= 20 && bullets.get(b).getType() == "enemy") {
       /* Remove bullet and reduce your ship health */
       bullets.remove(b);
-      myShip.setCurrentHealth(myShip.getCurrentHealth()-0.5);
+      myShip.setCurrentHealth(-0.5);
     } else {
       for (int a = asteroids.size()-2; a >= 0; a--) {
         /* Remove bullet and asteroid */
@@ -416,15 +426,17 @@ public void updateCollisions() {
 
   /* Reduce health if out of bounds */
   if(myShip.getX() < 0 || myShip.getX() > MAP_WIDTH || myShip.getY() < 0 || myShip.getY() > MAP_HEIGHT) {
-    myShip.setCurrentHealth(myShip.getCurrentHealth()-0.05);
+    myShip.setCurrentHealth(-0.5);
     if(myShip.getCurrentHealth()<=0){myShip.setCurrentFuel(0);myShip.setCurrentHeat(0);}
   }
+
   /* Cool down ship */
   myShip.setCurrentHeat(myShip.getCurrentHeat()-0.1);
+
   /* Over heat ends life */
   if(myShip.getCurrentHeat() >= myShip.getMaxHeat()) {
     bullets.clear();
-    myShip.setCurrentHealth(0);
+    myShip.setCurrentHealth(-myShip.getCurrentHealth());
     myShip.setCurrentFuel(0);
   }
 }
@@ -436,6 +448,7 @@ public void showGUI() {
   textSize(15);
 
   /* Draw gray sidebar */
+  strokeWeight(1);
   stroke(255);
   fill(100,100);
   rect(myShip.getX()+425,myShip.getY()-400,275,1050);
@@ -446,6 +459,7 @@ public void showGUI() {
   text("Health",myShip.getX()+450,myShip.getY()-90);
 
   /* Health bar */
+  strokeWeight(1);
   stroke(255);
   fill(255,0,0);
   rect(myShip.getX()+450,
@@ -459,6 +473,7 @@ public void showGUI() {
  text("Fuel",myShip.getX()+450,myShip.getY()-50);
 
   /* Fuel bar */
+  strokeWeight(1);
   stroke(255);
   fill(0,255,0);
   rect(myShip.getX()+450,
@@ -472,6 +487,7 @@ public void showGUI() {
   text("Heat",myShip.getX()+450,myShip.getY()-10);
 
   /* Heat bar */
+  strokeWeight(1);
   stroke(255);
   fill(0,0,255);
   rect(myShip.getX()+450,
