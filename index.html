@@ -2,7 +2,7 @@
 	<head>
 		<meta charset="utf-8">
 		<title>Asteroids | Brandon</title>
-		<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+		<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
 		<link rel="stylesheet" href="styles.css">
 		<script src="processing.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/buzz/1.2.0/buzz.min.js"></script>
@@ -56,17 +56,17 @@
 		</script>
 	</head>
 	<body>
-			<section id="content">
-				<canvas id="AsteroidsGame" data-processing-sources="AsteroidsGame.pde Asteroid.pde Floater.pde SpaceShip.pde Star.pde Bullet.pde Camera.pde MiniMap.pde MyShip.pde EnemyShip.pde Spacestation.pde"></canvas>
-		  </section>
-			<header>
-				<h1>Asteroids and More</h1>
-			</header>
-	    <footer>
-				<br />
+		<div class="gamescreen">
+			<canvas id="AsteroidsGame" data-processing-sources="AsteroidsGame.pde Asteroid.pde Floater.pde SpaceShip.pde Star.pde Bullet.pde Camera.pde MiniMap.pde MyShip.pde EnemyShip.pde Spacestation.pde"></canvas>
+	  </div>
+	  <div class="text">
+			<h1>Asteroids and More</h1>
+			<p>
 				W to accelerate. S to negatively accelerate. A to turn left. D to turn right. Q to hyperspace. SPACE to fire bullets. P to start and restart *ENTER doesn't work for some reason :/ TAB to pause
-				<br />
+			</p>
+			<p>
 				Dev: Brandon Lou for Lowell HS' AP Computer Science class.
-	    </footer>
+			</p>
+		</div>
 	</body>
 </html>

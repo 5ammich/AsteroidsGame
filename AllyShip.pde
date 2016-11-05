@@ -1,0 +1,2 @@
+class AllyShip extends SpaceShip {
+}

@@ -1,10 +1,11 @@
 // TODO
-// Ally ships
-// Help
+// Help screen on start and on pause
+// Explosion animation
 // E to go warp speed
-// Spacestation
-// Methods to get better stats
+// spacestation health and heal, upgrade stuff, etc.
+// Ally ships
 // Objectives
+// Game stats on game over screen
 // Game win! / Credits
 // Title screen graphics
 // Sound effects
@@ -14,6 +15,11 @@ public interface JavaScript {
   void playSound(String s);
   void enterKeyPressed();
   void escKeyPressed();
+  void wKeyPressed();
+  void aKeyPressed();
+  void sKeyPressed();
+  void dKeyPressed();
+  void qKeyPressed();
 }
 public void bindJavascript(JavaScript js) {
   javascript = js;
@@ -44,7 +50,7 @@ public boolean bgMusicPlaying = false;
 
 /* Object variables */
 public MyShip myShip;
-public ArrayList<SpaceShip> allyShips = new ArrayList<SpaceShip>();
+public ArrayList<AllyShip> allyShips = new ArrayList<AllyShip>();
 public ArrayList<EnemyShip> enemyShips = new ArrayList<EnemyShip>();
 public ArrayList<Star> stars = new ArrayList<Star>();
 public ArrayList<Asteroid> asteroids = new ArrayList<Asteroid>();
@@ -103,18 +109,21 @@ public void draw() {
 }
 
 public void titleScreen() {
-  /* Clear and reset arraylists */
+  /* Clear and reset arraylists and variables */
   bullets.clear();
   enemyShips.clear();
   asteroids.clear();
   stars.clear();
   allyShips.clear();
+  score = 0;
+  asteroidsDestroyed = 0;
+  bulletsShot = 0;
+  enemiesDestroyed = 0;
 
   /* Initialize objects */
   myShip = new MyShip();
   camera = new Camera();
   minimap = new MiniMap();
-
   for(int i = 0; i < NUM_STARS; i++) {
     if(stars.size() <= NUM_STARS) {
       stars.add(new Star());
@@ -133,18 +142,10 @@ public void titleScreen() {
     }
   }
 
-  /* Reset game variables */
-  score = 0;
-  asteroidsDestroyed = 0;
-  bulletsShot = 0;
-  enemiesDestroyed = 0;
-
-  /* Prompt user */
   background(0);
-
+  /* Title screen graphics */
   spaceship.resize(200,200);
   image(spaceship,0,0);
-
   textSize(16);
   textAlign(CENTER);
   fill(255);
@@ -165,13 +166,6 @@ public void gameScreen() {
   translate(-camera.pos.x, -camera.pos.y);
   camera.draw(myShip);
 
-  /* Background music */
-  if(bgMusicPlaying == false && javascript != null) {
-    javascript.playSound("bg");
-    bgMusicPlaying = true;
-    titleMusicPlaying = false;
-  }
-
   /* Resets draw screen */
   background(OUT_OF_BOUNDS_COLOR);
 
@@ -179,7 +173,7 @@ public void gameScreen() {
   checkKeyValues();
   updateCollisions();
 
-  /* Show everything */
+  /* Show everything in this order*/
   showSpace();
   showAsteroids();
   friendlySpacestation.show();
@@ -188,20 +182,27 @@ public void gameScreen() {
   showEnemyShips();
   showShip();
   showGUI();
+
+  /* Background music */
+  if(bgMusicPlaying == false && javascript != null) {
+    javascript.playSound("bg");
+    bgMusicPlaying = true;
+    titleMusicPlaying = false;
+  }
 }
 
 public void pauseScreen() {
+  /* Pause screen graphics */
   textSize(24);
   fill(255);
   text("Paused.",50,100);
 }
 
 public void gameOverScreen() {
-  /* Explode */
+  /* Explode NEEDS ANIMATION!!!*/
   myShip.dissapear();
-  // Explosion animation
 
-  /* Game over prompt */
+  /* Game over graphics */
   strokeWeight(1);
   stroke(255,0,0);
   fill(255,255,255);
@@ -212,9 +213,11 @@ public void gameOverScreen() {
 }
 
 public void creditsScreen() {
+  // yay
 }
 
-/* Switch case when key is pressed that assigns TRUE to a hashmap key */
+/* Switch case when key is pressed that assigns TRUE to a hashmap key
+   Only if running processing natively */
 public void keyPressed() {
   switch(key) {
     case 'w':
@@ -247,6 +250,7 @@ public void keyPressed() {
   }
 }
 
+/* Key pressed on javascript side */
 public void enterKeyPressed() {
   if(gameState == 3) {
     gameState = 0;
@@ -254,7 +258,6 @@ public void enterKeyPressed() {
     gameState = 1;
   }
 }
-
 public void escKeyPressed() {
   if(gameState == 1) {
     gameState = 2;
@@ -319,6 +322,7 @@ public void showEnemyShips() {
     enemyShips.get(e).move();
     enemyShips.get(e).show();
     if (dist(enemyShips.get(e).getX(), enemyShips.get(e).getY(), myShip.getX(), myShip.getY()) <= 1000 && (int)(Math.random()*10) == 0) {
+      /* Randomly shoots */
       bullets.add(new Bullet(enemyShips.get(e), "enemy"));
     }
   }
@@ -441,9 +445,9 @@ public void updateCollisions() {
   }
 }
 
-/* Shows HOV graphical user interface - very cool */
 public void showGUI() {
 
+  /* Render minimap */
   minimap.render();
   textSize(15);
 
@@ -508,6 +512,7 @@ public void showGUI() {
   text("ESC to pause",myShip.getX()+450,myShip.getY()+325);
 }
 
+/* Extra thingy */
 public boolean hasFuel() {
   return(myShip.getCurrentFuel()>0);
 }
