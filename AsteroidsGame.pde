@@ -13,13 +13,8 @@
 /* Connect processing with browser js */
 public interface JavaScript {
   void playSound(String s);
-  void enterKeyPressed();
-  void escKeyPressed();
-  void wKeyPressed();
-  void aKeyPressed();
-  void sKeyPressed();
-  void dKeyPressed();
-  void qKeyPressed();
+  void keyDown(String k);
+  void keyUp(String k);
 }
 public void bindJavascript(JavaScript js) {
   javascript = js;
@@ -250,22 +245,66 @@ public void keyPressed() {
   }
 }
 
-/* Key pressed on javascript side */
-public void enterKeyPressed() {
-  if(gameState == 3) {
-    gameState = 0;
-  } else if (gameState == 0) {
-    gameState = 1;
+/* Javascript to processing key function*/
+public void keyDown(String k) {
+  switch(k) {
+    case "w":
+      keys.put("w",true);
+      break;
+    case "a":
+      keys.put("a",true);
+      break;
+    case "s":
+      keys.put("s",true);
+      break;
+    case "d":
+      keys.put("d",true);
+      break;
+    case " ":
+      keys.put(" ", true);
+      break;
   }
 }
-public void escKeyPressed() {
-  if(gameState == 1) {
-    gameState = 2;
-  } else if (gameState == 2) {
-    gameState = 1;
+public void keyUp(String k) {
+  switch (k) {
+    case "w":
+      keys.put("w",false);
+    break;
+    case "a":
+      keys.put("a",false);
+    break;
+    case "s":
+      keys.put("s",false);
+    break;
+    case "d":
+      keys.put("d",false);
+    break;
+    case "q":
+    if(hasFuel()) {
+      myShip.hyperspace();
+      camera.hyperspace(myShip);
+    } break;
+    case " ":
+      keys.put(" ", false);
+      break;
+    case "ENTER":
+      if(gameState == 3) {
+        gameState = 0;
+      } else if (gameState == 0) {
+        gameState = 1;
+      }
+      break;
+    case "ESC":
+      if(gameState == 1) {
+        gameState = 2;
+      } else if (gameState == 2) {
+        gameState = 1;
+      }
+      break;
   }
 }
 
+/* NATIVE PROCESSING KEY FUNCTIONS */
 /* Switch case when key is released that assigns FALSE to a hashmap key */
 public void keyReleased() {
   switch(key) {

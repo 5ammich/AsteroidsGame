@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 	<head>
 		<meta charset="utf-8">
-		<title>Asteroids | Brandon</title>
+		<title>Asteroids++ | Brandon</title>
 		<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
 		<link rel="stylesheet" href="styles.css">
 		<script src="processing.js"></script>
@@ -42,15 +42,53 @@
 						break;
 				}
 			}
-
-			$(document).keyup(function(e) {
-				if(e.which == 13) {
-				  pjs.enterKeyPressed();
+			$(document).keydown(function(e) {
+				switch(e.which) {
+					case 87:
+						pjs.keyDown("w");
+						break;
+					case 65:
+						pjs.keyDown("a");
+						break;
+					case 83:
+						pjs.keyDown("s");
+						break;
+					case 68:
+						pjs.keyDown("d");
+						break;
+					case 32:
+						pjs.keyDown(" ");
+						return false;
+						break;
 				}
 			});
+
 			$(document).keyup(function(e) {
-				if(e.which == 27) {
-					pjs.escKeyPressed();
+				switch(e.which) {
+					case 13:
+						pjs.keyUp("ENTER");
+						break;
+					case 27:
+						pjs.keyUp("ESC")
+						break;
+					case 87:
+						pjs.keyUp("w");
+						break;
+					case 65:
+						pjs.keyUp("a");
+						break;
+					case 83:
+						pjs.keyUp("s");
+						break;
+					case 68:
+						pjs.keyUp("d");
+						break;
+					case 81:
+						pjs.keyUp("q");
+						break;
+					case 32:
+						pjs.keyUp(" ");
+						break;
 				}
 			});
 		</script>
@@ -62,10 +100,13 @@
 	  <div class="text">
 			<h1>Asteroids and More</h1>
 			<p>
-				W to accelerate. S to negatively accelerate. A to turn left. D to turn right. Q to hyperspace. SPACE to fire bullets. P to start and restart *ENTER doesn't work for some reason :/ TAB to pause
+				Controls: W to accelerate. S to negatively accelerate. A to rotate left. D to rotate right. Q to hyperspace. SPACE to fire bullets. ENTER to start. ESC to pause.
 			</p>
 			<p>
 				Dev: Brandon Lou for Lowell HS' AP Computer Science class.
+			</p>
+			<p>
+				Github: <a href="https://github.com/brlou-apcs/AsteroidsGame">[link]</a>. Please submit any bugs/glitches in the repo's issues.
 			</p>
 		</div>
 	</body>

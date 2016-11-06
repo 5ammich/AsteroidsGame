@@ -27,6 +27,14 @@ p {
   margin-left: 20vw;
 }
 
+a:link, a:visited {
+  color: #00BFFF;
+}
+
+a:hover {
+  font-weight: bold;
+}
+
 .gamescreen {
   background: black;
   height: 100vh;
