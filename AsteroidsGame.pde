@@ -551,7 +551,7 @@ public void showGUI() {
   text("ESC to pause",myShip.getX()+450,myShip.getY()+325);
 }
 
-/* Extra thingy */
+/* Helpers */
 public boolean hasFuel() {
   return(myShip.getCurrentFuel()>0);
 }

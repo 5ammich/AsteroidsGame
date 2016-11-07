@@ -35,6 +35,10 @@ a:hover {
   font-weight: bold;
 }
 
+canvas{
+  outline: none;
+}
+
 .gamescreen {
   background: black;
   height: 100vh;
