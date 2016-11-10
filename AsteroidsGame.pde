@@ -1,14 +1,8 @@
 // TODO
-// Help screen on start and on pause
 // Explosion animation
 // E to go warp speed
 // spacestation health and heal, upgrade stuff, etc.
-// Ally ships
-// Objectives
-// Game stats on game over screen
-// Game win! / Credits
-// Title screen graphics
-// Sound effects
+// Garud, wing, offense ships
 
 /* Connect processing with browser js */
 public interface JavaScript {
@@ -26,13 +20,14 @@ public final int NUM_STARS = 2000;
 public final double MY_SHIP_ACCELERATION = 0.1;
 public final double ASTEROID_SPAWN_CHANCE = 10;
 public final int MAX_ASTEROIDS = 20;
-public final int INITIAL_ENEMIES = 5;
+public final int INITIAL_ENEMIES = 50;
 public final int MAP_WIDTH = 5000;
 public final int MAP_HEIGHT = 5000;
 public final int OUT_OF_BOUNDS_COLOR = color(50,0,0);
 public final int displayWidth = 1100;
 public final int displayHeight = 700;
 public PImage spaceship;
+public final int BOX_KEY_SIZE = 75;
 
 /* Game variables */
 public int gameState = 0;
@@ -45,7 +40,7 @@ public boolean bgMusicPlaying = false;
 
 /* Object variables */
 public MyShip myShip;
-public ArrayList<AllyShip> allyShips = new ArrayList<AllyShip>();
+public ArrayList<WingShip> wingShips = new ArrayList<WingShip>();
 public ArrayList<EnemyShip> enemyShips = new ArrayList<EnemyShip>();
 public ArrayList<Star> stars = new ArrayList<Star>();
 public ArrayList<Asteroid> asteroids = new ArrayList<Asteroid>();
@@ -57,6 +52,7 @@ public MiniMap minimap;
 
 /* Other variables */
 public HashMap<String,Boolean> keys = new HashMap<String,Boolean>();
+public String missionText = "placeholder";
 
 public void setup() {
   /* Set screen size, framerate */
@@ -109,7 +105,7 @@ public void titleScreen() {
   enemyShips.clear();
   asteroids.clear();
   stars.clear();
-  allyShips.clear();
+  wingShips.clear();
   score = 0;
   asteroidsDestroyed = 0;
   bulletsShot = 0;
@@ -133,7 +129,7 @@ public void titleScreen() {
   }
   for(int i = 0; i < INITIAL_ENEMIES; i++) {
     if(enemyShips.size() < INITIAL_ENEMIES) {
-      enemyShips.add(new EnemyShip());
+      enemyShips.add(new EnemyShip("scout"));
     }
   }
 
@@ -188,9 +184,19 @@ public void gameScreen() {
 
 public void pauseScreen() {
   /* Pause screen graphics */
+  fill(0,0,0,1);
+  stroke(0);
+  rect(0,0,displayWidth,displayHeight);
   textSize(24);
   fill(255);
   text("Paused.",50,100);
+  stroke(255);
+  strokeWeight(5);
+  fill(0,0,0,0); // transparent
+  rect(250,75,BOX_KEY_SIZE,BOX_KEY_SIZE);
+  rect(165,160,BOX_KEY_SIZE,BOX_KEY_SIZE);
+  rect(250,160,BOX_KEY_SIZE,BOX_KEY_SIZE);
+  rect(335,160,BOX_KEY_SIZE,BOX_KEY_SIZE);
 }
 
 public void gameOverScreen() {
@@ -208,7 +214,7 @@ public void gameOverScreen() {
 }
 
 public void creditsScreen() {
-  // yay
+  // VERY VERY VERY VERY UNLIKELY
 }
 
 /* Switch case when key is pressed that assigns TRUE to a hashmap key
@@ -336,11 +342,11 @@ public void keyReleased() {
 public void checkKeyValues() {
   if (keys.get("w") == true && hasFuel()) {
     myShip.accelerate(MY_SHIP_ACCELERATION);
-    myShip.setCurrentFuel(myShip.getCurrentFuel()-0.02);
+    myShip.setCurrentFuel(-0.02);
   }
   if (keys.get("s") == true && hasFuel()) {
     myShip.accelerate(-(MY_SHIP_ACCELERATION));
-    myShip.setCurrentFuel(myShip.getCurrentFuel()-0.02);
+    myShip.setCurrentFuel(-0.02);
   }
   if (keys.get("a") == true) {
     myShip.rotate(-3);
@@ -350,7 +356,7 @@ public void checkKeyValues() {
   }
   if (keys.get(" ") == true) {
       bullets.add(new Bullet(myShip,"mine"));
-      myShip.setCurrentHeat(myShip.getCurrentHeat()+0.3);
+      myShip.setCurrentHeat(0.2);
       bulletsShot++;
       myShip.recoil();
   }
@@ -414,8 +420,8 @@ public void updateCollisions() {
       /* If asteroid hits your ship, GAME OVER */
       asteroids.remove(a);
       myShip.setCurrentHealth(-myShip.getCurrentHealth());
-      myShip.setCurrentFuel(0);
-      myShip.setCurrentHeat(0);
+      myShip.setCurrentFuel(-myShip.getCurrentFuel());
+      myShip.setCurrentHeat(-myShip.getCurrentHeat());
       gameState = 3;
     } else {
       /* Loops through all enemyships */
@@ -469,18 +475,24 @@ public void updateCollisions() {
 
   /* Reduce health if out of bounds */
   if(myShip.getX() < 0 || myShip.getX() > MAP_WIDTH || myShip.getY() < 0 || myShip.getY() > MAP_HEIGHT) {
-    myShip.setCurrentHealth(-0.5);
-    if(myShip.getCurrentHealth()<=0){myShip.setCurrentFuel(0);myShip.setCurrentHeat(0);}
+    myShip.setCurrentHealth(-0.1);
+    if(myShip.getCurrentHealth()<=0){myShip.setCurrentFuel(-myShip.getCurrentFuel());myShip.setCurrentHeat(-myShip.getCurrentHeat());}
   }
 
   /* Cool down ship */
-  myShip.setCurrentHeat(myShip.getCurrentHeat()-0.1);
+  myShip.setCurrentHeat(-0.1);
 
   /* Over heat ends life */
   if(myShip.getCurrentHeat() >= myShip.getMaxHeat()) {
     bullets.clear();
     myShip.setCurrentHealth(-myShip.getCurrentHealth());
-    myShip.setCurrentFuel(0);
+    myShip.setCurrentFuel(-myShip.getCurrentFuel());
+  }
+
+  /* Spacestation heals spaceship*/
+  if(dist(myShip.getX(), myShip.getY(), friendlySpacestation.x, friendlySpacestation.y) <= friendlySpacestation.radius) {
+    myShip.setCurrentHealth(0.1);
+    myShip.setCurrentFuel(1);
   }
 }
 
@@ -543,11 +555,19 @@ public void showGUI() {
   textAlign(LEFT);
   text("Score: " + score,myShip.getX()+450,myShip.getY()+40);
 
-  /* Current objective */
+  /* Stats */
+  text("Max health: " + myShip.getMaxHealth(),myShip.getX()+450,myShip.getY()+80);
+  text("Armor: ",myShip.getX()+450,myShip.getY()+100);
+  text("Laser power: ",myShip.getX()+450,myShip.getY()+120);
+  text("Max fuel: " + myShip.getMaxFuel(),myShip.getX()+450,myShip.getY()+140);
+  text("Fuel efficency: ",myShip.getX()+450,myShip.getY()+160);
+  text("Max heat: " + myShip.getMaxHeat(),myShip.getX()+450,myShip.getY()+180);
+  text("Offensive allies: 0",myShip.getX()+450,myShip.getY()+200);
+  text("Wing allies: " + wingShips.size(),myShip.getX()+450,myShip.getY()+220);
+  text("Gaurd allies: 0",myShip.getX()+450,myShip.getY()+240);
+  text("Spacestation Health: " + friendlySpacestation.getMaxHealth(),myShip.getX()+450,myShip.getY()+260);
 
   /* Pause */
-  fill(255);
-  textAlign(LEFT);
   text("ESC to pause",myShip.getX()+450,myShip.getY()+325);
 }
 

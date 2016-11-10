@@ -12,13 +12,27 @@ public class Bullet extends Floater {
     double dRadians = myPointDirection * (Math.PI/180);
     myDirectionX = 20 * Math.cos(dRadians) + ship.getDirectionX();
     myDirectionY = 20 * Math.sin(dRadians) + ship.getDirectionY();
-    type = t;
-    if(type == "mine" || type == "friendly") {
-      fillColor = color(0,191,255);
-      strokeColor = color(0,191,255);
-    } else if (type == "enemy") {
-      fillColor = color(255,0,0);
-      strokeColor = color(255,0,0);
+    switch (t) {
+      case "mine":
+        type = t;
+        fillColor = color(0,191,255);
+        strokeColor = color(0,191,255);
+        break;
+      case "friendly":
+        type = t;
+        fillColor = color(0,191,255);
+        strokeColor = color(0,191,255);
+        break;
+      case "enemy":
+        type = t;
+        fillColor = color(255,0,0);
+        strokeColor = color(255,0,0);
+        break;
+      case "enemy_boss":
+        type = t;
+        fillColor = color(0,255,0);
+        strokeColor = color(0,255,0);
+      break;
     }
   }
   public void setX(int x){myCenterX = x;}

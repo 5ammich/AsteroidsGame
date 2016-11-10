@@ -1,5 +1,6 @@
 public class Spacestation {
-  private float x,y,diameter;
+  public float x,y,radius;
+  private float diameter;
   private double currentHealth, maxHealth;
   private String type;
   private int fillColor, strokeColor;
@@ -9,6 +10,7 @@ public class Spacestation {
     this.maxHealth = 10;
     this.type = t;
     this.diameter = 500;
+    this.radius = this.diameter/2;
 
     if(type == "friendly") {
       this.x = 400;
@@ -34,5 +36,13 @@ public class Spacestation {
 
   public void setCurrentHealth(double ch) {
     this.currentHealth += ch;
+  }
+
+  public double getMaxHealth() {
+    return this.maxHealth;
+  }
+
+  public void setMaxHealth(double mh) {
+    maxHealth += mh;
   }
 }
