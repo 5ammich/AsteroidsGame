@@ -27,10 +27,11 @@ public class WingShip extends SpaceShip {
       currentHealth = maxHealth;
     }
   }
-
+/*
   public void move() {
     for(int i = enemyShips.size()-1, i >= 0; i--) {
 
     }
   }
+  */
 }
