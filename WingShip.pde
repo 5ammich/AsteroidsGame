@@ -1,5 +1,7 @@
 public class WingShip extends SpaceShip {
-  private double currentHealth,maxHealth;
+  private double currentHealth,maxHealth,ACCELERATION,deltaX,deltaY,angle;
+  private boolean inRange;
+  private ArrayList<EnemyShip> temp = new ArrayList<EnemyShip>();
 
   public WingShip() {
     corners = 11;
@@ -16,7 +18,9 @@ public class WingShip extends SpaceShip {
     myPointDirection = 0;
     this.currentHealth = 5;
     this.maxHealth = 5;
-    MAX_VELOCITY = 4.5;
+    ACCELERATION = random(0.05,0.3);
+    MAX_VELOCITY = random(2.0,4.0);
+    inRange = false;
   }
   public double getMaxHealth(){return maxHealth;}
   public double getCurrentHealth(){return currentHealth;}
@@ -27,11 +31,74 @@ public class WingShip extends SpaceShip {
       currentHealth = maxHealth;
     }
   }
-/*
-  public void move() {
-    for(int i = enemyShips.size()-1, i >= 0; i--) {
 
+  public void move() {
+
+    /* Copies enemyships arraylist to temp arraylist */
+    temp.clear();
+    for(int e = 0; e < enemyShips.size(); e++) {
+      temp.add(enemyShips.get(e));
     }
+
+    if (temp.size() > 0) {
+      while(temp.size() > 1) { /* While loop that removes farthest ship */
+        if (dist((float)this.myCenterX,(float)this.myCenterY,temp.get(0).getX(),temp.get(0).getY()) > dist((float)this.myCenterX,(float)this.myCenterY,temp.get(1).getX(),temp.get(1).getY())) {
+          temp.remove(0);
+        } else {
+          temp.remove(1);
+        }
+      } /* In the end, we have an arraylist with size one with the ship closest */
+
+      deltaX = temp.get(0).getX() - myCenterX;
+      deltaY = temp.get(0).getY() - myCenterY;
+
+      angle = atan((float)(deltaY/deltaX)) * (180/Math.PI);
+
+      if(temp.get(0).getX() < myCenterX) {
+        angle += 180;
+      }
+
+      myPointDirection = angle;
+      inRange = dist((float)myCenterX,(float)myCenterY,temp.get(0).getX(),temp.get(0).getY()) <= 1000;
+
+    } else { /* Go towards your ship */
+
+      deltaX = myShip.getX() - myCenterX;
+      deltaY = myShip.getY() - myCenterY;
+
+      angle = atan((float)(deltaY/deltaX)) * (180/Math.PI);
+
+      if(myShip.getX() < myCenterX) {
+        angle += 180;
+      }
+
+      myPointDirection = angle;
+      inRange = false;
+    }
+
+    /* Accelerate in point direction */
+    accelerate(ACCELERATION);
+
+    /* Limit velocity */
+    if(myDirectionX > MAX_VELOCITY) {
+      myDirectionX = MAX_VELOCITY;
+    }
+    if(myDirectionX < -(MAX_VELOCITY)) {
+      myDirectionX = -(MAX_VELOCITY);
+    }
+    if(myDirectionY > MAX_VELOCITY) {
+      myDirectionY = MAX_VELOCITY;
+    }
+    if(myDirectionY < -(MAX_VELOCITY)) {
+      myDirectionY = -(MAX_VELOCITY);
+    }
+
+    /* Actually move it */
+    myCenterX += myDirectionX;
+    myCenterY += myDirectionY;
   }
-  */
+
+  public boolean isInRange() {
+    return inRange;
+  }
 }

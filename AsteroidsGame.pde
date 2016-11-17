@@ -1,8 +1,7 @@
-// TODO
 // Explosion animation
-// E to go warp speed
 // spacestation health and heal, upgrade stuff, etc.
-// Garud, wing, offense ships
+// Health bars
+// E to go warp speed
 
 /* Connect processing with browser js */
 public interface JavaScript {
@@ -20,7 +19,8 @@ public final int NUM_STARS = 2000;
 public final double MY_SHIP_ACCELERATION = 0.1;
 public final double ASTEROID_SPAWN_CHANCE = 10;
 public final int MAX_ASTEROIDS = 20;
-public final int INITIAL_ENEMIES = 50;
+public final int INITIAL_ENEMIES = 2;
+public final int INITIAL_WINGSHIPS = 2;
 public final int MAP_WIDTH = 5000;
 public final int MAP_HEIGHT = 5000;
 public final int OUT_OF_BOUNDS_COLOR = color(50,0,0);
@@ -133,6 +133,12 @@ public void titleScreen() {
     }
   }
 
+  for(int i = 0; i < INITIAL_WINGSHIPS; i++) {
+    if(wingShips.size() < INITIAL_WINGSHIPS) {
+      wingShips.add(new WingShip());
+    }
+  }
+
   background(0);
   /* Title screen graphics */
   spaceship.resize(200,200);
@@ -162,6 +168,7 @@ public void gameScreen() {
 
   /* Checks which keys are held down and updates accordingly */
   checkKeyValues();
+  addEnemies();
   updateCollisions();
 
   /* Show everything in this order*/
@@ -170,7 +177,7 @@ public void gameScreen() {
   friendlySpacestation.show();
   enemySpacestation.show();
   showBullets();
-  showEnemyShips();
+  showSpaceShips();
   showShip();
   showGUI();
 
@@ -362,13 +369,20 @@ public void checkKeyValues() {
   }
 }
 
-public void showEnemyShips() {
+public void showSpaceShips() {
   for(int e = enemyShips.size()-1; e >= 0; e--) {
     enemyShips.get(e).move();
     enemyShips.get(e).show();
     if (dist(enemyShips.get(e).getX(), enemyShips.get(e).getY(), myShip.getX(), myShip.getY()) <= 1000 && (int)(Math.random()*10) == 0) {
       /* Randomly shoots */
       bullets.add(new Bullet(enemyShips.get(e), "enemy"));
+    }
+  }
+  for(int w = wingShips.size()-1; w >= 0; w--) {
+    wingShips.get(w).move();
+    wingShips.get(w).show();
+    if(wingShips.get(w).isInRange() && (int)(Math.random()*10) == 0) {
+      bullets.add(new Bullet(wingShips.get(w), "friendly"));
     }
   }
 }
@@ -463,6 +477,7 @@ public void updateCollisions() {
   for(int e = enemyShips.size() - 1; e >= 0; e--) {
     if (enemyShips.get(e).getCurrentHealth() <= 0) {
       enemyShips.remove(e);
+      score += 5;
     } else {
       for(int b = bullets.size() - 1; b >= 0; b--) {
         if(dist(bullets.get(b).getX(), bullets.get(b).getY(), enemyShips.get(e).getX(), enemyShips.get(e).getY()) <= 20 && (bullets.get(b).getType() == "friendly" || bullets.get(b).getType() == "mine")) {
@@ -562,13 +577,42 @@ public void showGUI() {
   text("Max fuel: " + myShip.getMaxFuel(),myShip.getX()+450,myShip.getY()+140);
   text("Fuel efficency: ",myShip.getX()+450,myShip.getY()+160);
   text("Max heat: " + myShip.getMaxHeat(),myShip.getX()+450,myShip.getY()+180);
-  text("Offensive allies: 0",myShip.getX()+450,myShip.getY()+200);
-  text("Wing allies: " + wingShips.size(),myShip.getX()+450,myShip.getY()+220);
-  text("Gaurd allies: 0",myShip.getX()+450,myShip.getY()+240);
+  text("Ally ships: " + wingShips.size(),myShip.getX()+450,myShip.getY()+220);
   text("Spacestation Health: " + friendlySpacestation.getMaxHealth(),myShip.getX()+450,myShip.getY()+260);
 
   /* Pause */
   text("ESC to pause",myShip.getX()+450,myShip.getY()+325);
+}
+
+public void addEnemies() {
+  if(score <= 20) {
+    if((int)random(0,200) == 0) enemyShips.add(new EnemyShip("scout"));
+
+  } else if (score <= 50) {
+    if((int)random(0,175) == 0) enemyShips.add(new EnemyShip("scout"));
+    if((int)random(0,300) == 0) enemyShips.add(new EnemyShip("adv"));
+
+  } else if (score <= 200) {
+    if((int)random(0,175) == 0) enemyShips.add(new EnemyShip("scout"));
+    if((int)random(0,275) == 0) enemyShips.add(new EnemyShip("adv"));
+
+  } else if (score <= 500) {
+    if((int)random(0,175) == 0) enemyShips.add(new EnemyShip("scout"));
+    if((int)random(0,275) == 0) enemyShips.add(new EnemyShip("adv"));
+    if((int)random(0,500) == 0) enemyShips.add(new EnemyShip("captain"));
+
+  } else if (score <= 1000) {
+    if((int)random(0,175) == 0) enemyShips.add(new EnemyShip("scout"));
+    if((int)random(0,275) == 0) enemyShips.add(new EnemyShip("adv"));
+    if((int)random(0,400) == 0) enemyShips.add(new EnemyShip("captain"));
+
+  } else if (score <= 5000) {
+    if((int)random(0,175) == 0) enemyShips.add(new EnemyShip("scout"));
+    if((int)random(0,275) == 0) enemyShips.add(new EnemyShip("adv"));
+    if((int)random(0,300) == 0) enemyShips.add(new EnemyShip("captain"));
+    if((int)random(0,500) == 0) enemyShips.add(new EnemyShip("boss"));
+
+  }
 }
 
 /* Helpers */

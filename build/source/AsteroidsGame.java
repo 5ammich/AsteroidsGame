@@ -14,11 +14,11 @@ import java.io.IOException;
 
 public class AsteroidsGame extends PApplet {
 
-// TODO
+// TODO:
 // Explosion animation
-// E to go warp speed
 // spacestation health and heal, upgrade stuff, etc.
-// Garud, wing, offense ships
+// Get ally ships
+// E to go warp speed
 
 /* Connect processing with browser js */
 public interface JavaScript {
@@ -36,7 +36,8 @@ public final int NUM_STARS = 2000;
 public final double MY_SHIP_ACCELERATION = 0.1f;
 public final double ASTEROID_SPAWN_CHANCE = 10;
 public final int MAX_ASTEROIDS = 20;
-public final int INITIAL_ENEMIES = 50;
+public final int INITIAL_ENEMIES = 2;
+public final int INITIAL_WINGSHIPS = 2;
 public final int MAP_WIDTH = 5000;
 public final int MAP_HEIGHT = 5000;
 public final int OUT_OF_BOUNDS_COLOR = color(50,0,0);
@@ -148,6 +149,11 @@ public void titleScreen() {
       enemyShips.add(new EnemyShip("scout"));
     }
   }
+  for(int i = 0; i < INITIAL_WINGSHIPS; i++) {
+    if(wingShips.size() < INITIAL_WINGSHIPS) {
+      wingShips.add(new WingShip());
+    }
+  }
 
   background(0);
   /* Title screen graphics */
@@ -178,6 +184,7 @@ public void gameScreen() {
 
   /* Checks which keys are held down and updates accordingly */
   checkKeyValues();
+  addEnemies();
   updateCollisions();
 
   /* Show everything in this order*/
@@ -186,7 +193,7 @@ public void gameScreen() {
   friendlySpacestation.show();
   enemySpacestation.show();
   showBullets();
-  showEnemyShips();
+  showSpaceShips();
   showShip();
   showGUI();
 
@@ -378,13 +385,20 @@ public void checkKeyValues() {
   }
 }
 
-public void showEnemyShips() {
+public void showSpaceShips() {
   for(int e = enemyShips.size()-1; e >= 0; e--) {
     enemyShips.get(e).move();
     enemyShips.get(e).show();
     if (dist(enemyShips.get(e).getX(), enemyShips.get(e).getY(), myShip.getX(), myShip.getY()) <= 1000 && (int)(Math.random()*10) == 0) {
       /* Randomly shoots */
       bullets.add(new Bullet(enemyShips.get(e), "enemy"));
+    }
+  }
+  for(int w = wingShips.size()-1; w >= 0; w--) {
+    wingShips.get(w).move();
+    wingShips.get(w).show();
+    if(wingShips.get(w).isInRange() && (int)(Math.random()*10) == 0) {
+      bullets.add(new Bullet(wingShips.get(w), "friendly"));
     }
   }
 }
@@ -479,6 +493,7 @@ public void updateCollisions() {
   for(int e = enemyShips.size() - 1; e >= 0; e--) {
     if (enemyShips.get(e).getCurrentHealth() <= 0) {
       enemyShips.remove(e);
+      score += 5;
     } else {
       for(int b = bullets.size() - 1; b >= 0; b--) {
         if(dist(bullets.get(b).getX(), bullets.get(b).getY(), enemyShips.get(e).getX(), enemyShips.get(e).getY()) <= 20 && (bullets.get(b).getType() == "friendly" || bullets.get(b).getType() == "mine")) {
@@ -578,13 +593,42 @@ public void showGUI() {
   text("Max fuel: " + myShip.getMaxFuel(),myShip.getX()+450,myShip.getY()+140);
   text("Fuel efficency: ",myShip.getX()+450,myShip.getY()+160);
   text("Max heat: " + myShip.getMaxHeat(),myShip.getX()+450,myShip.getY()+180);
-  text("Offensive allies: 0",myShip.getX()+450,myShip.getY()+200);
-  text("Wing allies: " + wingShips.size(),myShip.getX()+450,myShip.getY()+220);
-  text("Gaurd allies: 0",myShip.getX()+450,myShip.getY()+240);
+  text("Ally ships: " + wingShips.size(),myShip.getX()+450,myShip.getY()+220);
   text("Spacestation Health: " + friendlySpacestation.getMaxHealth(),myShip.getX()+450,myShip.getY()+260);
 
   /* Pause */
   text("ESC to pause",myShip.getX()+450,myShip.getY()+325);
+}
+
+public void addEnemies() {
+  if(score <= 20) {
+    if((int)random(0,200) == 0) enemyShips.add(new EnemyShip("scout"));
+
+  } else if (score <= 50) {
+    if((int)random(0,175) == 0) enemyShips.add(new EnemyShip("scout"));
+    if((int)random(0,300) == 0) enemyShips.add(new EnemyShip("adv"));
+
+  } else if (score <= 200) {
+    if((int)random(0,175) == 0) enemyShips.add(new EnemyShip("scout"));
+    if((int)random(0,275) == 0) enemyShips.add(new EnemyShip("adv"));
+
+  } else if (score <= 500) {
+    if((int)random(0,175) == 0) enemyShips.add(new EnemyShip("scout"));
+    if((int)random(0,275) == 0) enemyShips.add(new EnemyShip("adv"));
+    if((int)random(0,500) == 0) enemyShips.add(new EnemyShip("captain"));
+
+  } else if (score <= 1000) {
+    if((int)random(0,175) == 0) enemyShips.add(new EnemyShip("scout"));
+    if((int)random(0,275) == 0) enemyShips.add(new EnemyShip("adv"));
+    if((int)random(0,400) == 0) enemyShips.add(new EnemyShip("captain"));
+
+  } else if (score <= 5000) {
+    if((int)random(0,175) == 0) enemyShips.add(new EnemyShip("scout"));
+    if((int)random(0,275) == 0) enemyShips.add(new EnemyShip("adv"));
+    if((int)random(0,300) == 0) enemyShips.add(new EnemyShip("captain"));
+    if((int)random(0,500) == 0) enemyShips.add(new EnemyShip("boss"));
+
+  }
 }
 
 /* Helpers */
@@ -922,8 +966,8 @@ public class MiniMap {
     rect(myShip.getX()+450,myShip.getY()-325,200,200);
 
     /* Your spaceship on the map */
-    stroke(0,0,255);
-    fill(0,0,255);
+    stroke(255,255,0);
+    fill(255,255,0);
     ellipse(myShip.getX()+450+myShip.getX()/(MAP_WIDTH/200),myShip.getY()-325+myShip.getY()/(MAP_HEIGHT/200),5,5);
 
     /* Enemyships on the map */
@@ -931,6 +975,12 @@ public class MiniMap {
       stroke(255,0,0);
       fill(255,0,0);
       ellipse(myShip.getX()+450+enemyShips.get(e).getX()/(MAP_WIDTH/200),myShip.getY()-325+enemyShips.get(e).getY()/(MAP_HEIGHT/200),5,5);
+    }
+
+    for(int w = wingShips.size()-1; w >= 0; w--) {
+      stroke(0,191,255);
+      fill(0,191,255);
+      ellipse(myShip.getX()+450+wingShips.get(w).getX()/(MAP_WIDTH/200),myShip.getY()-325+wingShips.get(w).getY()/(MAP_HEIGHT/200),5,5);
     }
 
     /* Asteroids on the map */
@@ -1165,7 +1215,9 @@ public class Star {
   }
 }
 public class WingShip extends SpaceShip {
-  private double currentHealth,maxHealth;
+  private double currentHealth,maxHealth,ACCELERATION,deltaX,deltaY,angle;
+  private boolean inRange;
+  private ArrayList<EnemyShip> temp = new ArrayList<EnemyShip>();
 
   public WingShip() {
     corners = 11;
@@ -1182,7 +1234,9 @@ public class WingShip extends SpaceShip {
     myPointDirection = 0;
     this.currentHealth = 5;
     this.maxHealth = 5;
-    MAX_VELOCITY = 4.5f;
+    ACCELERATION = random(0.05f,0.3f);
+    MAX_VELOCITY = random(2.0f,4.0f);
+    inRange = false;
   }
   public double getMaxHealth(){return maxHealth;}
   public double getCurrentHealth(){return currentHealth;}
@@ -1193,13 +1247,76 @@ public class WingShip extends SpaceShip {
       currentHealth = maxHealth;
     }
   }
-/*
-  public void move() {
-    for(int i = enemyShips.size()-1, i >= 0; i--) {
 
+  public void move() {
+
+    /* Copies enemyships arraylist to temp arraylist */
+    temp.clear();
+    for(int e = 0; e < enemyShips.size(); e++) {
+      temp.add(enemyShips.get(e));
     }
+
+    if (temp.size() > 0) {
+      while(temp.size() > 1) { /* While loop that removes farthest ship */
+        if (dist((float)this.myCenterX,(float)this.myCenterY,temp.get(0).getX(),temp.get(0).getY()) > dist((float)this.myCenterX,(float)this.myCenterY,temp.get(1).getX(),temp.get(1).getY())) {
+          temp.remove(0);
+        } else {
+          temp.remove(1);
+        }
+      } /* In the end, we have an arraylist with size one with the ship closest */
+
+      deltaX = temp.get(0).getX() - myCenterX;
+      deltaY = temp.get(0).getY() - myCenterY;
+
+      angle = atan((float)(deltaY/deltaX)) * (180/Math.PI);
+
+      if(temp.get(0).getX() < myCenterX) {
+        angle += 180;
+      }
+
+      myPointDirection = angle;
+      inRange = dist((float)myCenterX,(float)myCenterY,temp.get(0).getX(),temp.get(0).getY()) <= 1000;
+
+    } else { /* Go towards your ship */
+
+      deltaX = myShip.getX() - myCenterX;
+      deltaY = myShip.getY() - myCenterY;
+
+      angle = atan((float)(deltaY/deltaX)) * (180/Math.PI);
+
+      if(myShip.getX() < myCenterX) {
+        angle += 180;
+      }
+
+      myPointDirection = angle;
+      inRange = false;
+    }
+
+    /* Accelerate in point direction */
+    accelerate(ACCELERATION);
+
+    /* Limit velocity */
+    if(myDirectionX > MAX_VELOCITY) {
+      myDirectionX = MAX_VELOCITY;
+    }
+    if(myDirectionX < -(MAX_VELOCITY)) {
+      myDirectionX = -(MAX_VELOCITY);
+    }
+    if(myDirectionY > MAX_VELOCITY) {
+      myDirectionY = MAX_VELOCITY;
+    }
+    if(myDirectionY < -(MAX_VELOCITY)) {
+      myDirectionY = -(MAX_VELOCITY);
+    }
+
+    /* Actually move it */
+    myCenterX += myDirectionX;
+    myCenterY += myDirectionY;
   }
-  */
+
+  public boolean isInRange() {
+    return inRange;
+  }
 }
   public void settings() {  size(displayWidth,displayHeight,P2D); }
   static public void main(String[] passedArgs) {

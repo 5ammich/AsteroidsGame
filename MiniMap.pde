@@ -7,8 +7,8 @@ public class MiniMap {
     rect(myShip.getX()+450,myShip.getY()-325,200,200);
 
     /* Your spaceship on the map */
-    stroke(0,0,255);
-    fill(0,0,255);
+    stroke(255,255,0);
+    fill(255,255,0);
     ellipse(myShip.getX()+450+myShip.getX()/(MAP_WIDTH/200),myShip.getY()-325+myShip.getY()/(MAP_HEIGHT/200),5,5);
 
     /* Enemyships on the map */
@@ -16,6 +16,12 @@ public class MiniMap {
       stroke(255,0,0);
       fill(255,0,0);
       ellipse(myShip.getX()+450+enemyShips.get(e).getX()/(MAP_WIDTH/200),myShip.getY()-325+enemyShips.get(e).getY()/(MAP_HEIGHT/200),5,5);
+    }
+
+    for(int w = wingShips.size()-1; w >= 0; w--) {
+      stroke(0,191,255);
+      fill(0,191,255);
+      ellipse(myShip.getX()+450+wingShips.get(w).getX()/(MAP_WIDTH/200),myShip.getY()-325+wingShips.get(w).getY()/(MAP_HEIGHT/200),5,5);
     }
 
     /* Asteroids on the map */
