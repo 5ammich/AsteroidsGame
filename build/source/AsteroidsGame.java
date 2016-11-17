@@ -14,10 +14,9 @@ import java.io.IOException;
 
 public class AsteroidsGame extends PApplet {
 
-// TODO:
 // Explosion animation
 // spacestation health and heal, upgrade stuff, etc.
-// Get ally ships
+// Health bars
 // E to go warp speed
 
 /* Connect processing with browser js */
@@ -62,6 +61,7 @@ public ArrayList<EnemyShip> enemyShips = new ArrayList<EnemyShip>();
 public ArrayList<Star> stars = new ArrayList<Star>();
 public ArrayList<Asteroid> asteroids = new ArrayList<Asteroid>();
 public ArrayList<Bullet> bullets = new ArrayList<Bullet>();
+public ArrayList<HealthBar> healthBars = new ArrayList<HealthBar>();
 public Spacestation friendlySpacestation;
 public Spacestation enemySpacestation;
 public Camera camera;
@@ -149,6 +149,7 @@ public void titleScreen() {
       enemyShips.add(new EnemyShip("scout"));
     }
   }
+
   for(int i = 0; i < INITIAL_WINGSHIPS; i++) {
     if(wingShips.size() < INITIAL_WINGSHIPS) {
       wingShips.add(new WingShip());
@@ -194,6 +195,7 @@ public void gameScreen() {
   enemySpacestation.show();
   showBullets();
   showSpaceShips();
+  showHealthBars();
   showShip();
   showGUI();
 
@@ -631,6 +633,22 @@ public void addEnemies() {
   }
 }
 
+public void showHealthBars() {
+  healthBars.clear();
+  /* Update health bars */
+  for (int e = 0; e < enemyShips.size(); e++) {
+    healthBars.add(new HealthBar(enemyShips.get(e).getX(),enemyShips.get(e).getY(),enemyShips.get(e).getMaxHealth(),enemyShips.get(e).getCurrentHealth()));
+  }
+  for (int w = 0; w < wingShips.size(); w++) {
+    healthBars.add(new HealthBar(wingShips.get(w).getX(),wingShips.get(w).getY(),wingShips.get(w).getMaxHealth(),wingShips.get(w).getCurrentHealth()));
+  }
+
+  /* Show health bars */
+  for(int h = 0; h < healthBars.size(); h++) {
+    healthBars.get(h).show();
+  }
+}
+
 /* Helpers */
 public boolean hasFuel() {
   return(myShip.getCurrentFuel()>0);
@@ -724,7 +742,7 @@ public class Bullet extends Floater {
     yCorners = yC;
     myCenterX = ship.getX();
     myCenterY = ship.getY();
-    myPointDirection = ship.getPointDirection();
+    myPointDirection = ship.getPointDirection() + Math.random()*5-2.5f;
     double dRadians = myPointDirection * (Math.PI/180);
     myDirectionX = 20 * Math.cos(dRadians) + ship.getDirectionX();
     myDirectionY = 20 * Math.sin(dRadians) + ship.getDirectionY();
@@ -857,7 +875,8 @@ public class EnemyShip extends SpaceShip {
         break;
     }
   }
-
+  
+  public double getMaxHealth() {return maxHealth;}
   public double getCurrentHealth(){return currentHealth;}
   public void setCurrentHealth(double ch){currentHealth += ch;}
 
@@ -956,6 +975,30 @@ public abstract class Floater {
   }
 }
 public class GaurdShip extends SpaceShip {
+}
+public class HealthBar {
+  private double x,y,maxWidth,myHeight,currentWidth,scaleFactor;
+  private int fillColor,strokeColor;
+
+  public HealthBar(double x, double y, double maxHealth, double currentHealth) {
+    this.x = x - 10;
+    this.y = y + 10;
+    this.maxWidth = 50;
+    this.scaleFactor = maxWidth / maxHealth;
+    this.currentWidth = currentHealth * scaleFactor;
+    this.fillColor = color(0,255,0); /* green */
+    this.myHeight = 10;
+  }
+
+  public void show() {
+    noStroke();
+    fill(fillColor);
+    rect((float)this.x, (float)this.y, (float)this.currentWidth, (float)this.myHeight);
+
+    stroke(255);
+    fill(0,0,0,0);
+    rect((float)this.x, (float)this.y, (float)this.maxWidth, (float)this.myHeight);
+  }
 }
 public class MiniMap {
   public MiniMap() {}

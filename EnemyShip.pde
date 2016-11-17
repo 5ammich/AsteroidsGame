@@ -69,7 +69,8 @@ public class EnemyShip extends SpaceShip {
         break;
     }
   }
-
+  
+  public double getMaxHealth() {return maxHealth;}
   public double getCurrentHealth(){return currentHealth;}
   public void setCurrentHealth(double ch){currentHealth += ch;}
 

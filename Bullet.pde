@@ -8,7 +8,7 @@ public class Bullet extends Floater {
     yCorners = yC;
     myCenterX = ship.getX();
     myCenterY = ship.getY();
-    myPointDirection = ship.getPointDirection();
+    myPointDirection = ship.getPointDirection() + Math.random()*5-2.5;
     double dRadians = myPointDirection * (Math.PI/180);
     myDirectionX = 20 * Math.cos(dRadians) + ship.getDirectionX();
     myDirectionY = 20 * Math.sin(dRadians) + ship.getDirectionY();

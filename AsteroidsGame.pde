@@ -45,6 +45,7 @@ public ArrayList<EnemyShip> enemyShips = new ArrayList<EnemyShip>();
 public ArrayList<Star> stars = new ArrayList<Star>();
 public ArrayList<Asteroid> asteroids = new ArrayList<Asteroid>();
 public ArrayList<Bullet> bullets = new ArrayList<Bullet>();
+public ArrayList<HealthBar> healthBars = new ArrayList<HealthBar>();
 public Spacestation friendlySpacestation;
 public Spacestation enemySpacestation;
 public Camera camera;
@@ -178,6 +179,7 @@ public void gameScreen() {
   enemySpacestation.show();
   showBullets();
   showSpaceShips();
+  showHealthBars();
   showShip();
   showGUI();
 
@@ -612,6 +614,22 @@ public void addEnemies() {
     if((int)random(0,300) == 0) enemyShips.add(new EnemyShip("captain"));
     if((int)random(0,500) == 0) enemyShips.add(new EnemyShip("boss"));
 
+  }
+}
+
+public void showHealthBars() {
+  healthBars.clear();
+  /* Update health bars */
+  for (int e = 0; e < enemyShips.size(); e++) {
+    healthBars.add(new HealthBar(enemyShips.get(e).getX(),enemyShips.get(e).getY(),enemyShips.get(e).getMaxHealth(),enemyShips.get(e).getCurrentHealth()));
+  }
+  for (int w = 0; w < wingShips.size(); w++) {
+    healthBars.add(new HealthBar(wingShips.get(w).getX(),wingShips.get(w).getY(),wingShips.get(w).getMaxHealth(),wingShips.get(w).getCurrentHealth()));
+  }
+
+  /* Show health bars */
+  for(int h = 0; h < healthBars.size(); h++) {
+    healthBars.get(h).show();
   }
 }
 
