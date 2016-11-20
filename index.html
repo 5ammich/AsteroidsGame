@@ -15,6 +15,7 @@
 			/* song variables */
 			var bg = new buzz.sound("bg",{formats:["mp3"],loop:true});
 			var title = new buzz.sound("title",{formats:["mp3"],loop:true});
+			var explode = new buzz.sound("explode",{formats:["wav"],loop:false});
 
 			var pjs;
 			var bound = false;
@@ -34,12 +35,14 @@
 				switch(song) {
 					case "title":
 						buzz.all().stop();
-						title.loop().play().fadeIn();
+						title.loop().play();
 						break;
 					case "bg":
 						buzz.all().stop();
 						bg.loop().play();
 						break;
+					case "explode":
+						explode.play();
 				}
 			}
 			$(document).keydown(function(e) {

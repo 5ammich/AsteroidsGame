@@ -1,6 +1,5 @@
 // Explosion animation
 // spacestation health and heal, upgrade stuff, etc.
-// Health bars
 // E to go warp speed
 
 /* Connect processing with browser js */
@@ -35,6 +34,7 @@ public int score;
 public int asteroidsDestroyed;
 public int bulletsShot;
 public int enemiesDestroyed;
+public int scrap = 0;
 public boolean titleMusicPlaying = false;
 public boolean bgMusicPlaying = false;
 
@@ -192,20 +192,48 @@ public void gameScreen() {
 }
 
 public void pauseScreen() {
-  /* Pause screen graphics */
+  /* Pause screen graphics setup */
   fill(0,0,0,1);
   stroke(0);
   rect(0,0,displayWidth,displayHeight);
-  textSize(24);
   fill(255);
-  text("Paused.",50,100);
-  stroke(255);
-  strokeWeight(5);
-  fill(0,0,0,0); // transparent
-  rect(250,75,BOX_KEY_SIZE,BOX_KEY_SIZE);
-  rect(165,160,BOX_KEY_SIZE,BOX_KEY_SIZE);
-  rect(250,160,BOX_KEY_SIZE,BOX_KEY_SIZE);
-  rect(335,160,BOX_KEY_SIZE,BOX_KEY_SIZE);
+
+  /* Pause title */
+  textSize(24);
+  text("Paused (ESC to unpause).",50,50);
+  textSize(20);
+  text("Scrap: " + scrap, 50, 75);
+
+  /* Ship upgrades */
+  text("Ship stats", 50, 200);
+  text("Max HP: ");
+  text("Armor: ");
+  text("Energy Lasers Mark I");
+  text("Max Fuel: ");
+  text("Fuel Efficiency");
+  text("Max Heat: ");
+  text("Cooling efficiency: ");
+
+  /* Ally ship upgrades */
+  if(dist(myShip.getX(),myShip.getY(),friendlySpacestation.x,friendlySpacestation.y < friendlySpacestation.radius)) {
+    text("Build ally ship: ");
+    text("Ally Max HP: ");
+  }
+
+  /* Spacestation upgrades */
+  text("Spacestation health");
+  text("Matter Converter Mark 1");
+
+  // Instruction text
+  textSize(15);
+  text("W - accelerate",880,40);
+  text("A - rotate left",880,60);
+  text("S - decellerate",880,80);
+  text("D - rotate right",880,100);
+  text("SPACE - fire bullets",880,120);
+  text("Q - hyperspace",880,140);
+  text("E - warp speed",880,160);
+  text("ESC - Pause / Upgrade station",880,180);
 }
 
 public void gameOverScreen() {
@@ -242,11 +270,6 @@ public void keyPressed() {
     case 'd':
       keys.put("d", true);
       break;
-    case 'q':
-      if(hasFuel()) {
-        myShip.hyperspace();
-        camera.hyperspace(myShip);
-      } break;
     case ' ':
       keys.put(" ", true);
       break;
@@ -337,6 +360,11 @@ public void keyReleased() {
     case ' ':
       keys.put(" ", false);
       break;
+    case 'q':
+      if(hasFuel()) {
+        myShip.hyperspace();
+        camera.hyperspace(myShip);
+      } break;
     case ENTER:
       if(gameState == 3) {
         gameState = 0;
@@ -480,6 +508,7 @@ public void updateCollisions() {
     if (enemyShips.get(e).getCurrentHealth() <= 0) {
       enemyShips.remove(e);
       score += 5;
+      if(javascript != null) javascript.playSound("explode");
     } else {
       for(int b = bullets.size() - 1; b >= 0; b--) {
         if(dist(bullets.get(b).getX(), bullets.get(b).getY(), enemyShips.get(e).getX(), enemyShips.get(e).getY()) <= 20 && (bullets.get(b).getType() == "friendly" || bullets.get(b).getType() == "mine")) {
@@ -497,17 +526,19 @@ public void updateCollisions() {
   }
 
   /* Cool down ship */
-  myShip.setCurrentHeat(-0.1);
+  if(keys.get(" ") == false) {
+    myShip.setCurrentHeat(-0.1);
+  }
 
   /* Over heat ends life */
   if(myShip.getCurrentHeat() >= myShip.getMaxHeat()) {
-    bullets.clear();
     myShip.setCurrentHealth(-myShip.getCurrentHealth());
     myShip.setCurrentFuel(-myShip.getCurrentFuel());
+    gameState = 3;
   }
 
   /* Spacestation heals spaceship*/
-  if(dist(myShip.getX(), myShip.getY(), friendlySpacestation.x, friendlySpacestation.y) <= friendlySpacestation.radius) {
+  if(dist(myShip.getX(), myShip.getY(), friendlySpacestation.x, friendlySpacestation.y) <= friendlySpacestation.radius && myShip.getCurrentHealth() >= 0) {
     myShip.setCurrentHealth(0.1);
     myShip.setCurrentFuel(1);
   }
@@ -573,14 +604,17 @@ public void showGUI() {
   text("Score: " + score,myShip.getX()+450,myShip.getY()+40);
 
   /* Stats */
-  text("Max health: " + myShip.getMaxHealth(),myShip.getX()+450,myShip.getY()+80);
-  text("Armor: ",myShip.getX()+450,myShip.getY()+100);
-  text("Laser power: ",myShip.getX()+450,myShip.getY()+120);
-  text("Max fuel: " + myShip.getMaxFuel(),myShip.getX()+450,myShip.getY()+140);
-  text("Fuel efficency: ",myShip.getX()+450,myShip.getY()+160);
-  text("Max heat: " + myShip.getMaxHeat(),myShip.getX()+450,myShip.getY()+180);
+  text("Scrap: " + scrap,myShip.getX()+450,myShip.getY()+80);
+  text("Max health: " + myShip.getMaxHealth(),myShip.getX()+450,myShip.getY()+100);
+  text("Armor: ",myShip.getX()+450,myShip.getY()+120);
+  text("Laser power: ",myShip.getX()+450,myShip.getY()+140);
+  text("Max fuel: " + myShip.getMaxFuel(),myShip.getX()+450,myShip.getY()+160);
+  text("Fuel efficency: ",myShip.getX()+450,myShip.getY()+180);
+  text("Max heat: " + myShip.getMaxHeat(),myShip.getX()+450,myShip.getY()+200);
   text("Ally ships: " + wingShips.size(),myShip.getX()+450,myShip.getY()+220);
+  text("Ally health: " + wingShips.size(),myShip.getX()+450,myShip.getY()+240);
   text("Spacestation Health: " + friendlySpacestation.getMaxHealth(),myShip.getX()+450,myShip.getY()+260);
+  text("Matter converter efficency: " + friendlySpacestation.getMaxHealth(),myShip.getX()+450,myShip.getY()+280);
 
   /* Pause */
   text("ESC to pause",myShip.getX()+450,myShip.getY()+325);

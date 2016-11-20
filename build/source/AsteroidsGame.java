@@ -16,7 +16,6 @@ public class AsteroidsGame extends PApplet {
 
 // Explosion animation
 // spacestation health and heal, upgrade stuff, etc.
-// Health bars
 // E to go warp speed
 
 /* Connect processing with browser js */
@@ -51,6 +50,7 @@ public int score;
 public int asteroidsDestroyed;
 public int bulletsShot;
 public int enemiesDestroyed;
+public int scrap = 0;
 public boolean titleMusicPlaying = false;
 public boolean bgMusicPlaying = false;
 
@@ -108,6 +108,9 @@ public void draw() {
       break;
     case 4:
       creditsScreen();
+      break;
+    case 5:
+      upgradeScreen();
       break;
   }
   // Put this bottom code somewhere else and make it work
@@ -240,6 +243,10 @@ public void gameOverScreen() {
 
 public void creditsScreen() {
   // VERY VERY VERY VERY UNLIKELY
+}
+
+public void upgradeScreen() {
+
 }
 
 /* Switch case when key is pressed that assigns TRUE to a hashmap key
@@ -496,6 +503,7 @@ public void updateCollisions() {
     if (enemyShips.get(e).getCurrentHealth() <= 0) {
       enemyShips.remove(e);
       score += 5;
+      if(javascript != null) javascript.playSound("explode");
     } else {
       for(int b = bullets.size() - 1; b >= 0; b--) {
         if(dist(bullets.get(b).getX(), bullets.get(b).getY(), enemyShips.get(e).getX(), enemyShips.get(e).getY()) <= 20 && (bullets.get(b).getType() == "friendly" || bullets.get(b).getType() == "mine")) {
@@ -589,14 +597,17 @@ public void showGUI() {
   text("Score: " + score,myShip.getX()+450,myShip.getY()+40);
 
   /* Stats */
-  text("Max health: " + myShip.getMaxHealth(),myShip.getX()+450,myShip.getY()+80);
-  text("Armor: ",myShip.getX()+450,myShip.getY()+100);
-  text("Laser power: ",myShip.getX()+450,myShip.getY()+120);
-  text("Max fuel: " + myShip.getMaxFuel(),myShip.getX()+450,myShip.getY()+140);
-  text("Fuel efficency: ",myShip.getX()+450,myShip.getY()+160);
-  text("Max heat: " + myShip.getMaxHeat(),myShip.getX()+450,myShip.getY()+180);
+  text("Scrap: " + scrap,myShip.getX()+450,myShip.getY()+80);
+  text("Max health: " + myShip.getMaxHealth(),myShip.getX()+450,myShip.getY()+100);
+  text("Armor: ",myShip.getX()+450,myShip.getY()+120);
+  text("Laser power: ",myShip.getX()+450,myShip.getY()+140);
+  text("Max fuel: " + myShip.getMaxFuel(),myShip.getX()+450,myShip.getY()+160);
+  text("Fuel efficency: ",myShip.getX()+450,myShip.getY()+180);
+  text("Max heat: " + myShip.getMaxHeat(),myShip.getX()+450,myShip.getY()+200);
   text("Ally ships: " + wingShips.size(),myShip.getX()+450,myShip.getY()+220);
+  text("Ally health: " + wingShips.size(),myShip.getX()+450,myShip.getY()+240);
   text("Spacestation Health: " + friendlySpacestation.getMaxHealth(),myShip.getX()+450,myShip.getY()+260);
+  text("Matter converter efficency: " + friendlySpacestation.getMaxHealth(),myShip.getX()+450,myShip.getY()+280);
 
   /* Pause */
   text("ESC to pause",myShip.getX()+450,myShip.getY()+325);
@@ -981,13 +992,13 @@ public class HealthBar {
   private int fillColor,strokeColor;
 
   public HealthBar(double x, double y, double maxHealth, double currentHealth) {
-    this.x = x - 10;
-    this.y = y + 10;
+    this.x = x - 25;
+    this.y = y - 25;
     this.maxWidth = 50;
     this.scaleFactor = maxWidth / maxHealth;
     this.currentWidth = currentHealth * scaleFactor;
     this.fillColor = color(0,255,0); /* green */
-    this.myHeight = 10;
+    this.myHeight = 7;
   }
 
   public void show() {
