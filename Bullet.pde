@@ -1,5 +1,6 @@
 public class Bullet extends Floater {
   private String type;
+  private double initX, initY;
   public Bullet(SpaceShip ship, String t) {
     corners = 4;
     int[] xC = {2,2,-2,-2};
@@ -8,6 +9,8 @@ public class Bullet extends Floater {
     yCorners = yC;
     myCenterX = ship.getX();
     myCenterY = ship.getY();
+    this.initX = ship.getX();
+    this.initY = ship.getY();
     myPointDirection = ship.getPointDirection() + Math.random()*5-2.5;
     double dRadians = myPointDirection * (Math.PI/180);
     myDirectionX = 20 * Math.cos(dRadians) + ship.getDirectionX();
@@ -39,6 +42,8 @@ public class Bullet extends Floater {
   public int getX(){return (int)myCenterX;}
   public void setY(int y){myCenterY = y;}
   public int getY(){return (int)myCenterY;}
+  public int getInitX(){return (int)initX;}
+  public int getInitY(){return (int)initY;}
   public void setDirectionX(double x){myDirectionX = x;}
   public double getDirectionX(){return myDirectionX;}
   public void setDirectionY(double y){myDirectionY = y;}

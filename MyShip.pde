@@ -10,8 +10,8 @@ public class MyShip extends SpaceShip {
     yCorners = yC;
     fillColor = color(77,77,255);
     strokeColor = color(255,255,255);
-    myCenterX = 425;
-    myCenterY = 350;
+    myCenterX = 400;
+    myCenterY = 400;
     myDirectionX = 0;
     myDirectionY = 0;
     myPointDirection = 0;

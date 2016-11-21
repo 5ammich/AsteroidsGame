@@ -1,7 +1,7 @@
 public class Camera {
   public PVector pos;
   public Camera() {
-    pos = new PVector(0, 0);
+    pos = new PVector(myShip.getX() - 425, myShip.getY() - 350);
   }
 
   public void draw(MyShip ship) {
