@@ -1,4 +1,4 @@
-// Explosion animation
+// Explosion animation on your ship
 // spacestation health and heal, upgrade stuff, etc.
 // E to go warp speed
 // Index out of range problems
@@ -40,6 +40,7 @@ public int scrap = 0;
 public boolean titleMusicPlaying = false;
 public boolean bgMusicPlaying = false;
 public boolean pauseDrawn = false;
+public boolean gameOverShown = false;
 
 /* Object variables */
 public MyShip myShip;
@@ -50,6 +51,7 @@ public ArrayList<Asteroid> asteroids = new ArrayList<Asteroid>();
 public ArrayList<Bullet> bullets = new ArrayList<Bullet>();
 public ArrayList<HealthBar> healthBars = new ArrayList<HealthBar>();
 public ArrayList<Particle> particles = new ArrayList<Particle>();
+public ArrayList<MyShip> myShips = new ArrayList<MyShip>();
 public Spacestation friendlySpacestation;
 public Spacestation enemySpacestation;
 public Camera camera;
@@ -100,12 +102,14 @@ public void draw() {
   }
   // Put this bottom code somewhere else and make it work
   if(myShip.getCurrentHealth() <= 0) {
+    myShips.remove(0);
     gameState = 3;
   }
 }
 
 public void titleScreen() {
   /* Clear and reset arraylists and variables */
+  myShips.clear();
   particles.clear();
   bullets.clear();
   enemyShips.clear();
@@ -116,9 +120,11 @@ public void titleScreen() {
   asteroidsDestroyed = 0;
   bulletsShot = 0;
   enemiesDestroyed = 0;
+  gameOverShown = false;
 
   /* Initialize objects */
-  myShip = new MyShip();
+  myShips.add(new MyShip());
+  myShip = myShips.get(0);
   camera = new Camera();
   minimap = new MiniMap();
   for(int i = 0; i < NUM_STARS; i++) {
@@ -180,9 +186,9 @@ public void gameScreen() {
 
   /* Show everything in this order*/
   showSpace();
-  showAsteroids();
   friendlySpacestation.show();
   enemySpacestation.show();
+  showAsteroids();
   showBullets();
   showSpaceShips();
   showHealthBars();
@@ -251,8 +257,6 @@ public void pauseScreen() {
 }
 
 public void gameOverScreen() {
-  /* Explode NEEDS ANIMATION!!!*/
-  myShip.dissapear();
 
   /* Game over graphics */
   strokeWeight(1);
@@ -475,7 +479,6 @@ public void updateCollisions() {
     /* Out of bounds */
     if(asteroids.get(a).getX() > MAP_WIDTH || asteroids.get(a).getX() < 0 || asteroids.get(a).getY() > MAP_HEIGHT || asteroids.get(a).getY() < 0 || asteroids.get(a).getRotationSpeed() == 0) {
       asteroids.remove(a);
-      // asteroids explosion
       break;
 
     /* Hits ship */
@@ -484,6 +487,7 @@ public void updateCollisions() {
       myShip.setCurrentHealth(-myShip.getCurrentHealth());
       myShip.setCurrentFuel(-myShip.getCurrentFuel());
       myShip.setCurrentHeat(-myShip.getCurrentHeat());
+      myShips.remove(0);
       gameState = 3;
       break;
 
@@ -492,9 +496,9 @@ public void updateCollisions() {
       for(int b = bullets.size()-2; b >= 0; b--) {
         if(dist(asteroids.get(a).getX(),asteroids.get(a).getY(),bullets.get(b).getX(),bullets.get(b).getY()) <= 20) {
           bullets.remove(b);
-          // for(int i = 0; i < NUM_PARTICLES; i++) {
-          //   particles.add(new Particle(asteroids.get(a).getX(),asteroids.get(a).getY(),color(255,127,80)));
-          // }
+          for(int i = 0; i < NUM_PARTICLES; i++) {
+            particles.add(new Particle(asteroids.get(a).getX(),asteroids.get(a).getY(),color(255,127,80)));
+          }
           asteroids.remove(a);
         }
       }
@@ -529,6 +533,9 @@ public void updateCollisions() {
 
     /* Remove if dead */
     if (enemyShips.get(e).getCurrentHealth() <= 0) {
+      for(int i = 0; i < NUM_PARTICLES; i++) {
+        particles.add(new Particle(enemyShips.get(e).getX(),enemyShips.get(e).getY(),color(255,0,0)));
+      }
       enemyShips.remove(e);
       score += 5;
       if(javascript != null) javascript.playSound("explode");
@@ -540,6 +547,9 @@ public void updateCollisions() {
 
     /* Remove if dead */
     if(wingShips.get(w).getCurrentHealth() <= 0) {
+      for(int i = 0; i < NUM_PARTICLES; i++) {
+        particles.add(new Particle(wingShips.get(w).getX(),wingShips.get(w).getY(),color(0,0,255)));
+      }
       wingShips.remove(w);
 
     /* Hits bullet */
@@ -568,6 +578,7 @@ public void updateCollisions() {
   if(myShip.getCurrentHeat() >= myShip.getMaxHeat()) {
     myShip.setCurrentHealth(-myShip.getCurrentHealth());
     myShip.setCurrentFuel(-myShip.getCurrentFuel());
+    myShips.remove(0);
     gameState = 3;
   }
 
@@ -721,6 +732,9 @@ public void showParticles() {
   for(int s = particles.size()-1; s >= 0; s--) {
     particles.get(s).move();
     particles.get(s).show();
+    if(dist(particles.get(s).initX,particles.get(s).initY,particles.get(s).getX(),particles.get(s).getY()) >= 100) {
+      particles.remove(s);
+    }
   }
 }
 

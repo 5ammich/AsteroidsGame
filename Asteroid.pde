@@ -10,7 +10,7 @@ public class Asteroid extends Floater {
     yCorners = yC;
     myPointDirection = 0;
     strokeColor = color(255,127,80);
-    fillColor = color(0,0,0);
+    fillColor = color(0,0,0,0);
     rotationSpeed = (int)(Math.random()*8-4);
 
     /* 4 cases for asteroids to spawn in */

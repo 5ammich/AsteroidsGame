@@ -491,7 +491,6 @@ public void updateCollisions() {
     /* Out of bounds */
     if(asteroids.get(a).getX() > MAP_WIDTH || asteroids.get(a).getX() < 0 || asteroids.get(a).getY() > MAP_HEIGHT || asteroids.get(a).getY() < 0 || asteroids.get(a).getRotationSpeed() == 0) {
       asteroids.remove(a);
-      // asteroids explosion
       break;
 
     /* Hits ship */
@@ -508,9 +507,9 @@ public void updateCollisions() {
       for(int b = bullets.size()-2; b >= 0; b--) {
         if(dist(asteroids.get(a).getX(),asteroids.get(a).getY(),bullets.get(b).getX(),bullets.get(b).getY()) <= 20) {
           bullets.remove(b);
-          // for(int i = 0; i < NUM_PARTICLES; i++) {
-          //   particles.add(new Particle(asteroids.get(a).getX(),asteroids.get(a).getY(),color(255,127,80)));
-          // }
+          for(int i = 0; i < NUM_PARTICLES; i++) {
+            particles.add(new Particle(asteroids.get(a).getX(),asteroids.get(a).getY(),color(255,127,80)));
+          }
           asteroids.remove(a);
         }
       }
@@ -737,6 +736,9 @@ public void showParticles() {
   for(int s = particles.size()-1; s >= 0; s--) {
     particles.get(s).move();
     particles.get(s).show();
+    if(dist(particles.get(s).initX,particles.get(s).initY,particles.get(s).getCenterX(),particles.get(s).getCenterY()) >= 100) {
+      particles.remove(s);
+    }
   }
 }
 
@@ -1070,8 +1072,6 @@ public abstract class Floater {
     endShape(CLOSE);
   }
 }
-public class GaurdShip extends SpaceShip {
-}
 public class HealthBar {
   private double x,y,maxWidth,myHeight,currentWidth,scaleFactor;
   private int fillColor,strokeColor;
@@ -1253,27 +1253,27 @@ public class MyShip extends SpaceShip {
     show();
   }
 }
-public class OffenseShip extends SpaceShip {
-  // whoever is reading this, you are free to fork this project and finish it.
-}
 public class Particle extends Floater {
+  public double initX, initY;
   public Particle(double x, double y, int c) {
     corners = 3;
     strokeColor = c;
     fillColor = color(0,0,0);
-    int[] xC = {0,1,-1};
-    int[] yC = {1,-1,-1};
+    int[] xC = {0,5,-5};
+    int[] yC = {5,-5,-5};
     xCorners = xC;
     yCorners = yC;
     myCenterX = x;
     myCenterY = y;
-    myDirectionX = random(-2,2);
-    myDirectionY = random(-2,2);
-    myPointDirection = random(0,360);
+    initX = x;
+    initY = y;
+    myDirectionX = Math.random()*4-2;
+    myDirectionY = Math.random()*4-2;
+    myPointDirection = Math.random()*360;
   }
   public void setX(int x){}
   public int getX(){return (int)myCenterX;}
-  public void setY(int y){}{}
+  public void setY(int y){}
   public int getY(){return (int)myCenterY;}
   public void setDirectionX(double x){}
   public double getDirectionX(){return myDirectionX;}

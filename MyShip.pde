@@ -66,6 +66,6 @@ public class MyShip extends SpaceShip {
     int[] yC = {};
     xCorners = xC;
     yCorners = yC;
-    show();
+    super.show();
   }
 }

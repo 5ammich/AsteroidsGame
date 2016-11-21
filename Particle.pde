@@ -1,21 +1,24 @@
 public class Particle extends Floater {
+  public double initX, initY;
   public Particle(double x, double y, int c) {
     corners = 3;
     strokeColor = c;
     fillColor = color(0,0,0);
-    int[] xC = {0,1,-1};
-    int[] yC = {1,-1,-1};
+    int[] xC = {0,5,-5};
+    int[] yC = {5,-5,-5};
     xCorners = xC;
     yCorners = yC;
     myCenterX = x;
     myCenterY = y;
-    myDirectionX = random(-2,2);
-    myDirectionY = random(-2,2);
-    myPointDirection = random(0,360);
+    initX = x;
+    initY = y;
+    myDirectionX = Math.random()*4-2;
+    myDirectionY = Math.random()*4-2;
+    myPointDirection = Math.random()*360;
   }
   public void setX(int x){}
   public int getX(){return (int)myCenterX;}
-  public void setY(int y){}{}
+  public void setY(int y){}
   public int getY(){return (int)myCenterY;}
   public void setDirectionX(double x){}
   public double getDirectionX(){return myDirectionX;}
