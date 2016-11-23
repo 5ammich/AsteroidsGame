@@ -9,19 +9,19 @@ public class MiniMap {
     /* Your spaceship on the map */
     stroke(255,255,0);
     fill(255,255,0);
-    ellipse(myShip.getX()+450+myShip.getX()/(MAP_WIDTH/200),myShip.getY()-325+myShip.getY()/(MAP_HEIGHT/200),5,5);
+    if(inRange(myShip)) ellipse(myShip.getX()+450+myShip.getX()/(MAP_WIDTH/200),myShip.getY()-325+myShip.getY()/(MAP_HEIGHT/200),5,5);
 
     /* Enemyships on the map */
     for(int e = enemyShips.size()-1; e >= 0; e--) {
       stroke(255,0,0);
       fill(255,0,0);
-      ellipse(myShip.getX()+450+enemyShips.get(e).getX()/(MAP_WIDTH/200),myShip.getY()-325+enemyShips.get(e).getY()/(MAP_HEIGHT/200),5,5);
+      if(inRange(enemyShips.get(e))) ellipse(myShip.getX()+450+enemyShips.get(e).getX()/(MAP_WIDTH/200),myShip.getY()-325+enemyShips.get(e).getY()/(MAP_HEIGHT/200),5,5);
     }
 
     for(int w = wingShips.size()-1; w >= 0; w--) {
       stroke(0,191,255);
       fill(0,191,255);
-      ellipse(myShip.getX()+450+wingShips.get(w).getX()/(MAP_WIDTH/200),myShip.getY()-325+wingShips.get(w).getY()/(MAP_HEIGHT/200),5,5);
+      if(inRange(wingShips.get(w))) ellipse(myShip.getX()+450+wingShips.get(w).getX()/(MAP_WIDTH/200),myShip.getY()-325+wingShips.get(w).getY()/(MAP_HEIGHT/200),5,5);
     }
 
     /* Asteroids on the map */
@@ -31,6 +31,13 @@ public class MiniMap {
       ellipse(myShip.getX()+450+asteroids.get(a).getX()/(MAP_WIDTH/200),
               myShip.getY()-325+asteroids.get(a).getY()/(MAP_HEIGHT/200),
               1,1);
+    }
+  }
+  private boolean inRange(SpaceShip ship) {
+    if(ship.getX() > 0 && ship.getX() < MAP_WIDTH && ship.getY() > 0 && ship.getY() < MAP_HEIGHT) {
+      return true;
+    } else {
+      return false;
     }
   }
 }

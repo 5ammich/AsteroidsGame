@@ -258,14 +258,34 @@ public void pauseScreen() {
 
 public void gameOverScreen() {
 
+  if(!gameOverShown) {
+    for(int i = 0; i < NUM_PARTICLES; i++) {
+      particles.add(new Particle(myShip.getX(),myShip.getY(),color(0,0,255)));
+    }
+    gameOverShown = true;
+  }
+
+  translate(-camera.pos.x, -camera.pos.y);
+  background(OUT_OF_BOUNDS_COLOR);
+  updateCollisions();
+  showSpace();
+  friendlySpacestation.show();
+  enemySpacestation.show();
+  showAsteroids();
+  showBullets();
+  showSpaceShips();
+  showHealthBars();
+  showParticles();
+  showGUI();
+
   /* Game over graphics */
   strokeWeight(1);
   stroke(255,0,0);
   fill(255,255,255);
   textAlign(CENTER);
   textSize(24);
-  text("YOU DIED",width/2, height/2);
-  text("ENTER to play again",width/2, height/2+20);
+  text("YOU DIED",myShip.getX(),myShip.getY());
+  text("ENTER to play again",myShip.getX(),myShip.getY()+20);
 }
 
 public void creditsScreen() {
@@ -519,7 +539,7 @@ public void updateCollisions() {
 
     /* Hits enemy ship */
     } else {
-      for(int e = enemyShips.size()-2; e >= 0; e--) {
+      for(int e = enemyShips.size()-1; e >= 0; e--) {
         if(dist(bullets.get(b).getX(), bullets.get(b).getY(), enemyShips.get(e).getX(), enemyShips.get(e).getY()) <= 20 && (bullets.get(b).getType() == "mine" || bullets.get(b).getType() == "friendly")) {
           bullets.remove(b);
           enemyShips.get(e).setCurrentHealth(-0.5);
@@ -571,7 +591,7 @@ public void updateCollisions() {
 
   /* Cool down ship */
   if(keys.get(" ") == false) {
-    myShip.setCurrentHeat(-0.1);
+    myShip.setCurrentHeat(-0.3);
   }
 
   /* Over heat ends life */
@@ -610,10 +630,18 @@ public void showGUI() {
   strokeWeight(1);
   stroke(255);
   fill(255,0,0);
+
+  if(myShip.getCurrentHealth() > 0) {
   rect(myShip.getX()+450,
        myShip.getY()-80,
        (float)(myShip.getCurrentHealth()*(200/myShip.getMaxHealth())),
        10);
+  } else {
+    rect(myShip.getX()+450,
+         myShip.getY()-80,
+         0,
+         10);
+  }
 
  /* Fuel text */
  fill(255);
@@ -732,7 +760,7 @@ public void showParticles() {
   for(int s = particles.size()-1; s >= 0; s--) {
     particles.get(s).move();
     particles.get(s).show();
-    if(dist(particles.get(s).initX,particles.get(s).initY,particles.get(s).getX(),particles.get(s).getY()) >= 100) {
+    if(dist((float)particles.get(s).initX,(float)particles.get(s).initY,particles.get(s).getX(),particles.get(s).getY()) >= 100) {
       particles.remove(s);
     }
   }
