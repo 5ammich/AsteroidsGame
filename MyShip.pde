@@ -1,6 +1,6 @@
 public class MyShip extends SpaceShip {
 
-  private double maxHealth,currentHealth,currentFuel,maxFuel,currentHeat,maxHeat;
+  private double maxHealth,currentHealth,currentFuel,maxFuel,currentHeat,maxHeat,currentSpeed,maxSpeed;
 
   public MyShip() {
     corners = 11;
@@ -22,6 +22,8 @@ public class MyShip extends SpaceShip {
     maxHeat = 50;
     currentHeat = 0;
     MAX_VELOCITY = 5;
+    currentSpeed = 0;
+    maxSpeed = 0;
   }
   public double getMaxHealth(){return maxHealth;}
   public double getCurrentHealth(){return currentHealth;}
@@ -60,12 +62,22 @@ public class MyShip extends SpaceShip {
       currentFuel -= 10;
     }
   }
-  public void dissapear() {
-    corners=0;
-    int[] xC = {};
-    int[] yC = {};
-    xCorners = xC;
-    yCorners = yC;
-    super.show();
+  public void teleport(double x, double y) {
+    if(currentFuel > 10) {
+      myCenterX = x;
+      myCenterY = y;
+      myDirectionX = 0;
+      myDirectionY = 0;
+      currentFuel -= 10;
+    }
   }
+  public double getCurrentSpeed() {
+    currentSpeed = Math.abs(Math.sqrt(Math.pow(myDirectionX,2) + Math.pow(myDirectionY,2)));
+    return currentSpeed;
+  }
+  public double getMaxSpeed() {
+    maxSpeed = Math.sqrt(Math.pow(MAX_VELOCITY,2) + Math.pow(MAX_VELOCITY,2));
+    return maxSpeed;
+  }
+
 }

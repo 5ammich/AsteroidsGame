@@ -1,7 +1,9 @@
-// Explosion animation on your ship
 // spacestation health and heal, upgrade stuff, etc.
 // E to go warp speed
+// Rocket visuals... meh
 // Index out of range problems
+// Game over text
+// Ships decrase health if out of range
 
 /* Connect processing with browser js */
 public interface JavaScript {
@@ -27,7 +29,6 @@ public final int OUT_OF_BOUNDS_COLOR = color(50,0,0);
 public final int NUM_PARTICLES = 10;
 public final int displayWidth = 1100;
 public final int displayHeight = 700;
-public PImage spaceship;
 //public final int BOX_KEY_SIZE = 75;
 
 /* Game variables */
@@ -76,7 +77,6 @@ public void setup() {
   keys.put(" ", false);
 
   /* Initialize objects that WILL NOT change */
-  spaceship = loadImage("spaceship.png");
   friendlySpacestation = new Spacestation("friendly");
   enemySpacestation = new Spacestation("enemy");
 }
@@ -153,14 +153,15 @@ public void titleScreen() {
 
   background(0);
   /* Title screen graphics */
-  spaceship.resize(200,200);
-  image(spaceship,0,0);
   textSize(16);
   textAlign(CENTER);
   fill(255);
   textSize(32);
-  text("Asteroids and more", width/2,height/2-40);
-  text("ENTER to start", width/2, height/2);
+  textAlign(RIGHT);
+  text("Asteroids and More", width,100);
+  textSize(20);
+  text("Brandon Lou", width,150);
+  text("ENTER to start", width, height);
 
   /* Title screen music */
   if(titleMusicPlaying == false && javascript != null) {
@@ -195,6 +196,7 @@ public void gameScreen() {
   showParticles();
   showShip();
   showGUI();
+  mouseCursor();
 
   /* Background music */
   if(bgMusicPlaying == false && javascript != null) {
@@ -221,36 +223,38 @@ public void pauseScreen() {
     text("Scrap: " + scrap, 50, 75);
 
     /* Ship upgrades */
-    // text("Ship stats", 50, 125);
-    // text("Max HP: ");
-    // text("Armor: ");
-    // text("Energy Lasers Mark I");
-    // text("Max Fuel: ");
-    // text("Fuel Efficiency");
-    // text("Max Heat: ");
-    // text("Cooling efficiency: ");
-    //
-    // /* Ally ship upgrades */
-    // if(dist(myShip.getX(),myShip.getY(),friendlySpacestation.x,friendlySpacestation.y < friendlySpacestation.radius)) {
-    //   text("Build ally ship: ");
-    //   text("Ally Max HP: ");
-    // }
-    //
-    // /* Spacestation upgrades */
-    // text("Spacestation health");
-    // text("Matter Converter Mark 1");
-    //
-    // // Instruction text
-    // textSize(15);
-    // text("CONTROLS:",880,40);
-    // text("W - accelerate",880,40);
-    // text("A - rotate left",880,60);
-    // text("S - decellerate",880,80);
-    // text("D - rotate right",880,100);
-    // text("SPACE - fire bullets",880,120);
-    // text("Q - hyperspace",880,140);
-    // text("E - warp speed",880,160);
-    // text("ESC - Pause / Upgrade station",880,180);
+    textSize(18);
+    text("Ship stats", 50, 125);
+    text("10s +2 Max HP", 50, 145);
+    text("10s +2 Armor", 50, 165);
+    text("15s Energy Lasers Mark II", 50, 185);
+    text("10s +10 Max Fuel", 50, 205);
+    text("5s +10 Fuel Efficiency", 50, 225);
+    text("50s +10 Max Heat", 50, 245);
+    text("30s +5 Cooling efficiency", 50, 265);
+
+    /* Ally ship upgrades */
+    if(dist(myShip.getX(),myShip.getY(),friendlySpacestation.x,friendlySpacestation.y) < friendlySpacestation.radius) {
+      text("10s Build ally ship",400,140);
+      text("30s +10 Ally Max HP",400,160);
+    }
+
+    /* Spacestation upgrades */
+    text("Spacestation Upgrades",50,400);
+    text("20s +10 Spacestation health",50,420);
+    text("100s Matter Converter Mark II",50,440);
+
+    // Instruction text
+    textSize(15);
+    text("CONTROLS:",880,40);
+    text("W - accelerate",880,60);
+    text("A - rotate left",880,80);
+    text("S - decellerate",880,100);
+    text("D - rotate right",880,120);
+    text("SPACE - fire bullets",880,140);
+    text("Q - hyperspace",880,160);
+    text("E - warp speed",880,180);
+    text("ESC - Pause / Upgrade station",880,200);
 
     pauseDrawn = true;
   }
@@ -277,15 +281,19 @@ public void gameOverScreen() {
   showHealthBars();
   showParticles();
   showGUI();
+  mouseCursor();
 
   /* Game over graphics */
+  noStroke();
+  fill(0,0,0,100);
+  rect(myShip.getX()-425,myShip.getY()-350,displayWidth,displayHeight);
   strokeWeight(1);
   stroke(255,0,0);
   fill(255,255,255);
-  textAlign(CENTER);
+  textAlign(LEFT);
   textSize(24);
-  text("YOU DIED",myShip.getX(),myShip.getY());
-  text("ENTER to play again",myShip.getX(),myShip.getY()+20);
+  text("YOU DIED",myShip.getX()-400,myShip.getY()-300);
+  text("ENTER to play again",myShip.getX()-400,myShip.getY()-270);
 }
 
 public void creditsScreen() {
@@ -356,7 +364,7 @@ public void keyUp(String k) {
       keys.put("d",false);
     break;
     case "q":
-    if(hasFuel()) {
+    if(hasFuel() && myShip.getCurrentFuel() > 0) {
       myShip.hyperspace();
       camera.hyperspace(myShip);
     } break;
@@ -399,7 +407,7 @@ public void keyReleased() {
       keys.put(" ", false);
       break;
     case 'q':
-      if(hasFuel()) {
+      if(hasFuel() && myShip.getCurrentHealth() > 0) {
         myShip.hyperspace();
         camera.hyperspace(myShip);
       } break;
@@ -431,7 +439,7 @@ public void checkKeyValues() {
   }
   if (keys.get(" ") == true) {
       bullets.add(new Bullet(myShip,"mine"));
-      myShip.setCurrentHeat(0.2);
+      myShip.setCurrentHeat(0.05);
       bulletsShot++;
       myShip.recoil();
   }
@@ -503,6 +511,9 @@ public void updateCollisions() {
 
     /* Hits ship */
     } else if (dist(asteroids.get(a).getX(), asteroids.get(a).getY(),myShip.getX(), myShip.getY()) <= 20) {
+      for(int i = 0; i < NUM_PARTICLES; i++) {
+        particles.add(new Particle(asteroids.get(a).getX(),asteroids.get(a).getY(),color(255,127,80)));
+      }
       asteroids.remove(a);
       myShip.setCurrentHealth(-myShip.getCurrentHealth());
       myShip.setCurrentFuel(-myShip.getCurrentFuel());
@@ -679,16 +690,16 @@ public void showGUI() {
    /* Speed bar */
    strokeWeight(1);
    stroke(255);
-   fill(0,0,255);
+   fill(255,255,0);
    rect(myShip.getX()+450,
         myShip.getY()+40,
-        (float)(myShip.getCurrentHeat()*(200/myShip.getMaxHeat())),
+        (float)(myShip.getCurrentSpeed()*(200/myShip.getMaxSpeed())),
         10);
 
   /* Points */
   fill(255);
   textAlign(LEFT);
-  text("Score: " + score,myShip.getX()+450,myShip.getY()+40);
+  text("Score: " + score,myShip.getX()+450,myShip.getY()+60);
 
   /* Stats */
   text("Scrap: " + scrap,myShip.getX()+450,myShip.getY()+80);
@@ -764,6 +775,31 @@ public void showParticles() {
       particles.remove(s);
     }
   }
+  if(keys.get("w") == true) {
+    //cool stuff
+    fill(255,0,0);
+    double dRadians = myShip.getPointDirection() * (Math.PI/180);
+    rect((float)(myShip.getX() - 20*Math.cos(dRadians)),(float)(myShip.getY() - 20*Math.sin(dRadians)),10,10);
+  }
+}
+
+public void mouseClicked() {
+  if(mouseX > 875 && mouseX < 1075 && mouseY > 25 && mouseY < 225) {
+    double x  = mouseX - 875; // Gets values down to a range of 0 - 200
+    double y = mouseY - 25;
+    x *= 25; // Scale factor from 200 minimap size to 5000 map size
+    y *= 25;
+    myShip.teleport(x,y);
+    camera.hyperspace(myShip);
+  }
+}
+
+public void mouseCursor() {
+  stroke(255);
+  fill(255,105,180,100);
+  int originX = myShip.getX() - 425;
+  int originY = myShip.getY() - 350;
+  ellipse(originX+mouseX, originY+mouseY,20,20);
 }
 
 /* Helpers */

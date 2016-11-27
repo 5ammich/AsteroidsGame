@@ -37,6 +37,7 @@ a:hover {
 
 canvas {
   outline: none;
+  cursor: none;
 }
 
 .gamescreen {
