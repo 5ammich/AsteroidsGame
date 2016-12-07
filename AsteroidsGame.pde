@@ -1,9 +1,9 @@
 // spacestation health and heal, upgrade stuff, etc.
 // E to go warp speed
 // Rocket visuals... meh
-// Index out of range problems
 // Game over text
 // Ships decrase health if out of range
+// asteroid spacestation collisions
 
 /* Connect processing with browser js */
 public interface JavaScript {
@@ -451,7 +451,8 @@ public void showSpaceShips() {
     enemyShips.get(e).show();
     if (dist(enemyShips.get(e).getX(), enemyShips.get(e).getY(), myShip.getX(), myShip.getY()) <= 1000 && (int)(Math.random()*10) == 0) {
       /* Randomly shoots */
-      bullets.add(new Bullet(enemyShips.get(e), "enemy"));
+      if(enemyShips.get(e).type == "boss") {bullets.add(new Bullet(enemyShips.get(e), "enemy_boss"));}
+      else {bullets.add(new Bullet(enemyShips.get(e), "enemy"));}
     }
   }
   for(int w = wingShips.size()-1; w >= 0; w--) {
@@ -500,111 +501,100 @@ public void showShip() {
 }
 
 public void updateCollisions() {
+  /* asteroids out of bounds gets removed, asteroids hits ship gets removed and particle effect
+  asteroids hits bullet removes asteroid and bullet. particle effect
+  bullets out of bound or lose energy gets removed
+  bullets hits ship or ship hits bullet
+  enemyships remove if dead, wingship remove if dead
+  reduce health if out of bounds
+  Cool down ship
+  Over heat ends life Spacestation heals spaceship
+  */
 
-  /* ASTEROIDS */
-  for(int a = asteroids.size()-2; a >= 0; a--) {
-
-    /* Out of bounds */
-    if(asteroids.get(a).getX() > MAP_WIDTH || asteroids.get(a).getX() < 0 || asteroids.get(a).getY() > MAP_HEIGHT || asteroids.get(a).getY() < 0 || asteroids.get(a).getRotationSpeed() == 0) {
-      asteroids.remove(a);
-      break;
-
-    /* Hits ship */
-    } else if (dist(asteroids.get(a).getX(), asteroids.get(a).getY(),myShip.getX(), myShip.getY()) <= 20) {
-      for(int i = 0; i < NUM_PARTICLES; i++) {
-        particles.add(new Particle(asteroids.get(a).getX(),asteroids.get(a).getY(),color(255,127,80)));
-      }
-      asteroids.remove(a);
-      myShip.setCurrentHealth(-myShip.getCurrentHealth());
-      myShip.setCurrentFuel(-myShip.getCurrentFuel());
-      myShip.setCurrentHeat(-myShip.getCurrentHeat());
-      myShips.remove(0);
-      gameState = 3;
-      break;
-
-    /* Hits bullet */
-    } else {
-      for(int b = bullets.size()-2; b >= 0; b--) {
-        if(dist(asteroids.get(a).getX(),asteroids.get(a).getY(),bullets.get(b).getX(),bullets.get(b).getY()) <= 20) {
-          bullets.remove(b);
-          for(int i = 0; i < NUM_PARTICLES; i++) {
-            particles.add(new Particle(asteroids.get(a).getX(),asteroids.get(a).getY(),color(255,127,80)));
-          }
-          asteroids.remove(a);
+  bulletloop:
+  for(int b = bullets.size()-1; b >= 0; b--) {
+    /* Hits asteroid */
+    asteroidloop:
+    for(int a = asteroids.size()-1; a >= 0; a--) {
+      if(dist(asteroids.get(a).getX(),asteroids.get(a).getY(),bullets.get(b).getX(),bullets.get(b).getY()) <= 20) {
+        bullets.remove(b);
+        for(int i = 0; i < NUM_PARTICLES; i++) {
+          particles.add(new Particle(asteroids.get(a).getX(),asteroids.get(a).getY(),color(255,127,80)));
         }
+        asteroids.remove(a);
+        break bulletloop;
+      }
+      /* Asteroids out of bounds */
+      if(asteroids.get(a).getX() > MAP_WIDTH || asteroids.get(a).getX() < 0 || asteroids.get(a).getY() > MAP_HEIGHT || asteroids.get(a).getY() < 0 || asteroids.get(a).getRotationSpeed() == 0) {
+        asteroids.remove(a);
+        break asteroidloop;
+      }
+      /* Asteroid hits ship */
+      if (dist(asteroids.get(a).getX(), asteroids.get(a).getY(),myShip.getX(), myShip.getY()) <= 20) {
+        for(int i = 0; i < NUM_PARTICLES; i++) {
+          particles.add(new Particle(asteroids.get(a).getX(),asteroids.get(a).getY(),color(255,127,80)));
+        }
+        asteroids.remove(a);
+        myShip.setCurrentHealth(-myShip.getCurrentHealth());
+        myShip.setCurrentFuel(-myShip.getCurrentFuel());
+        myShip.setCurrentHeat(-myShip.getCurrentHeat());
+        myShips.remove(0);
+        gameState = 3;
+        break asteroidloop;
       }
     }
-  }
-
-  /* BULLETS */
-  for(int b = bullets.size()-2; b >= 0; b--) {
-
-    /* Out of bounds or lost energy */
-    if(bullets.get(b).getX() > MAP_WIDTH || bullets.get(b).getX() < 0 || bullets.get(b).getY() > MAP_HEIGHT || bullets.get(b).getY() < 0 || dist(bullets.get(b).getInitX(),bullets.get(b).getInitY(),bullets.get(b).getX(),bullets.get(b).getY()) >= 700) {
+    /* Out of bounds or runs out of power */
+    if(dist(bullets.get(b).getInitX(),bullets.get(b).getInitY(),bullets.get(b).getX(),bullets.get(b).getY()) >= 700) {
       bullets.remove(b);
-
+      break bulletloop;
+    }
     /* Hits your ship */
-    } else if(dist(bullets.get(b).getX(), bullets.get(b).getY(), myShip.getX(), myShip.getY()) <= 20 && bullets.get(b).getType() == "enemy") {
+    if(dist(bullets.get(b).getX(), bullets.get(b).getY(), myShip.getX(), myShip.getY()) <= 20 && bullets.get(b).getType() == "enemy") {
       bullets.remove(b);
       myShip.setCurrentHealth(-0.5);
-
-    /* Hits enemy ship */
-    } else {
-      for(int e = enemyShips.size()-1; e >= 0; e--) {
-        if(dist(bullets.get(b).getX(), bullets.get(b).getY(), enemyShips.get(e).getX(), enemyShips.get(e).getY()) <= 20 && (bullets.get(b).getType() == "mine" || bullets.get(b).getType() == "friendly")) {
-          bullets.remove(b);
-          enemyShips.get(e).setCurrentHealth(-0.5);
+      break bulletloop;
+    }
+    /* Hits enemyship */
+    for(int e = enemyShips.size()-1; e >= 0; e--) {
+      if(dist(bullets.get(b).getX(), bullets.get(b).getY(), enemyShips.get(e).getX(), enemyShips.get(e).getY()) <= 20 && (bullets.get(b).getType() == "mine" || bullets.get(b).getType() == "friendly")) {
+        bullets.remove(b);
+        enemyShips.get(e).setCurrentHealth(-0.5);
+        break bulletloop;
+      }
+      /* Remove if dead */
+      if (enemyShips.get(e).getCurrentHealth() <= 0) {
+        for(int i = 0; i < NUM_PARTICLES; i++) {
+          particles.add(new Particle(enemyShips.get(e).getX(),enemyShips.get(e).getY(),color(255,0,0)));
         }
+        enemyShips.remove(e);
+        score += 5;
+        if(javascript != null) javascript.playSound("explode");
       }
     }
-  }
-
-  /* ENEMY SHIPS */
-  for(int e = enemyShips.size() - 1; e >= 0; e--) {
-
-    /* Remove if dead */
-    if (enemyShips.get(e).getCurrentHealth() <= 0) {
-      for(int i = 0; i < NUM_PARTICLES; i++) {
-        particles.add(new Particle(enemyShips.get(e).getX(),enemyShips.get(e).getY(),color(255,0,0)));
+    /* Hits wingship */
+    for(int w = wingShips.size()-1; w >= 0; w--) {
+      if(dist(wingShips.get(w).getX(),wingShips.get(w).getY(),bullets.get(b).getX(),bullets.get(b).getY()) <= 20 && bullets.get(b).getType() == "enemy") {
+        bullets.remove(b);
+        wingShips.get(w).setCurrentHealth(-0.5);
+        break bulletloop;
       }
-      enemyShips.remove(e);
-      score += 5;
-      if(javascript != null) javascript.playSound("explode");
-    }
-  }
-
-  /* WING SHIPS */
-  for(int w = wingShips.size()-1; w >= 0; w--) {
-
-    /* Remove if dead */
-    if(wingShips.get(w).getCurrentHealth() <= 0) {
-      for(int i = 0; i < NUM_PARTICLES; i++) {
-        particles.add(new Particle(wingShips.get(w).getX(),wingShips.get(w).getY(),color(0,0,255)));
-      }
-      wingShips.remove(w);
-
-    /* Hits bullet */
-    } else {
-      for(int b = bullets.size()-1; b >= 0; b--) {
-        if(dist(wingShips.get(w).getX(),wingShips.get(w).getY(),bullets.get(b).getX(),bullets.get(b).getY()) <= 20 && bullets.get(b).getType() == "enemy") {
-          bullets.remove(b);
-          wingShips.get(w).setCurrentHealth(-0.5);
+      if(wingShips.get(w).getCurrentHealth() <= 0) {
+        for(int i = 0; i < NUM_PARTICLES; i++) {
+          particles.add(new Particle(wingShips.get(w).getX(),wingShips.get(w).getY(),color(0,0,255)));
         }
+        wingShips.remove(w);
       }
     }
   }
-
   /* Reduce health if out of bounds */
   if(myShip.getX() < 0 || myShip.getX() > MAP_WIDTH || myShip.getY() < 0 || myShip.getY() > MAP_HEIGHT) {
     myShip.setCurrentHealth(-0.1);
     if(myShip.getCurrentHealth()<=0){myShip.setCurrentFuel(-myShip.getCurrentFuel());myShip.setCurrentHeat(-myShip.getCurrentHeat());}
   }
-
   /* Cool down ship */
   if(keys.get(" ") == false) {
     myShip.setCurrentHeat(-0.3);
   }
-
   /* Over heat ends life */
   if(myShip.getCurrentHeat() >= myShip.getMaxHeat()) {
     myShip.setCurrentHealth(-myShip.getCurrentHealth());
@@ -612,7 +602,6 @@ public void updateCollisions() {
     myShips.remove(0);
     gameState = 3;
   }
-
   /* Spacestation heals spaceship*/
   if(dist(myShip.getX(), myShip.getY(), friendlySpacestation.x, friendlySpacestation.y) <= friendlySpacestation.radius && myShip.getCurrentHealth() >= 0) {
     myShip.setCurrentHealth(0.1);
@@ -668,51 +657,73 @@ public void showGUI() {
        (float)(myShip.getCurrentFuel()*(200/myShip.getMaxFuel())),
        10);
 
-  /* Heat text */
-  fill(255);
-  textAlign(LEFT);
-  text("Heat",myShip.getX()+450,myShip.getY()-10);
-
-  /* Heat bar */
-  strokeWeight(1);
-  stroke(255);
-  fill(0,0,255);
-  rect(myShip.getX()+450,
-       myShip.getY()-0,
-       (float)(myShip.getCurrentHeat()*(200/myShip.getMaxHeat())),
-       10);
-
    /* Speed text */
    fill(255);
    textAlign(LEFT);
-   text("Speed",myShip.getX()+450,myShip.getY()+30);
+   text("Speed",myShip.getX()+450,myShip.getY()-10);
 
    /* Speed bar */
    strokeWeight(1);
    stroke(255);
    fill(255,255,0);
    rect(myShip.getX()+450,
-        myShip.getY()+40,
+        myShip.getY()-0,
         (float)(myShip.getCurrentSpeed()*(200/myShip.getMaxSpeed())),
         10);
 
-  /* Points */
+  /* Heat text */
   fill(255);
   textAlign(LEFT);
-  text("Score: " + score,myShip.getX()+450,myShip.getY()+60);
+  text("Heat",myShip.getX()+450,myShip.getY()+30);
+
+  /* Heat bar */
+  strokeWeight(1);
+  stroke(255);
+  fill(0,0,255);
+  rect(myShip.getX()+450,
+       myShip.getY()+40,
+       (float)(myShip.getCurrentHeat()*(200/myShip.getMaxHeat())),
+       10);
+
+  /* Sidebar stats */
+  fill(255);
+  textAlign(LEFT);
+  text("Score: " + score,myShip.getX()+450,myShip.getY()+80);
+  text("Scrap: " + scrap,myShip.getX()+450,myShip.getY()+100);
+
+  /* Warning messages */
+  textAlign(CENTER);
+  if(myShip.getCurrentHeat() >= myShip.getMaxHeat()*0.75) fill(0,191,255); else fill(0,0,139);
+  rect(myShip.getX()+450,myShip.getY()+120,200,50);
+  if(myShip.getCurrentHeat() >= myShip.getMaxHeat()*0.75) fill(255); else fill(100);
+  text("OVERHEATING!",myShip.getX()+550,myShip.getY()+150);
+
+  if(myShip.getCurrentFuel() <= myShip.getMaxFuel()*0.25) fill(0,255,0); else fill(0,100,0);
+  rect(myShip.getX()+450,myShip.getY()+180,200,50);
+  if(myShip.getCurrentFuel() <= myShip.getMaxFuel()*0.25) fill(255); else fill(100);
+  text("FUEL LOW",myShip.getX()+550,myShip.getY()+210);
+
+  if(myShip.getCurrentHealth() <= myShip.getMaxHealth()*0.25) fill(255,0,0); else fill(139,0,0);
+  rect(myShip.getX()+450,myShip.getY()+240,200,50);
+  if(myShip.getCurrentHealth() <= myShip.getMaxHealth()*0.25) fill(255); else fill(100);
+  text("HEALTH LOW",myShip.getX()+550,myShip.getY()+270);
 
   /* Stats */
-  text("Scrap: " + scrap,myShip.getX()+450,myShip.getY()+80);
-  text("Max health: " + myShip.getMaxHealth(),myShip.getX()+450,myShip.getY()+100);
-  text("Armor: ",myShip.getX()+450,myShip.getY()+120);
-  text("Laser power: ",myShip.getX()+450,myShip.getY()+140);
-  text("Max fuel: " + myShip.getMaxFuel(),myShip.getX()+450,myShip.getY()+160);
-  text("Fuel efficency: ",myShip.getX()+450,myShip.getY()+180);
-  text("Max heat: " + myShip.getMaxHeat(),myShip.getX()+450,myShip.getY()+200);
-  text("Ally ships: " + wingShips.size(),myShip.getX()+450,myShip.getY()+220);
-  text("Ally health: " + wingShips.size(),myShip.getX()+450,myShip.getY()+240);
-  text("Spacestation Health: " + friendlySpacestation.getMaxHealth(),myShip.getX()+450,myShip.getY()+260);
-  text("Matter converter efficency: " + friendlySpacestation.getMaxHealth(),myShip.getX()+450,myShip.getY()+280);
+  textAlign(LEFT);
+  fill(255);
+  text("Max health: " + myShip.getMaxHealth(),myShip.getX()-400,myShip.getY()-325);
+  text("Armor: ",myShip.getX()-400,myShip.getY()-300);
+  text("Laser power: ",myShip.getX()-400,myShip.getY()-275);
+
+  text("Max fuel: " + myShip.getMaxFuel(),myShip.getX()-200,myShip.getY()-325);
+  text("Fuel efficency: ",myShip.getX()-200,myShip.getY()-300);
+
+  text("Max heat: " + myShip.getMaxHeat(),myShip.getX(),myShip.getY()-325);
+
+  text("Ally ships: " + wingShips.size(),myShip.getX()-400,myShip.getY()+325);
+  text("Ally health: " + wingShips.size(),myShip.getX()-300,myShip.getY()+325);
+  text("Spacestation Health: " + friendlySpacestation.getMaxHealth(),myShip.getX()-200,myShip.getY()+325);
+  text("Matter converter efficency: " + friendlySpacestation.getMaxHealth(),myShip.getX()-25,myShip.getY()+325);
 
   /* Pause */
   text("ESC to pause",myShip.getX()+450,myShip.getY()+325);
@@ -745,7 +756,11 @@ public void addEnemies() {
     if((int)random(0,275) == 0) enemyShips.add(new EnemyShip("adv"));
     if((int)random(0,300) == 0) enemyShips.add(new EnemyShip("captain"));
     if((int)random(0,500) == 0) enemyShips.add(new EnemyShip("boss"));
-
+  } else {
+    if((int)random(0,100) == 0) enemyShips.add(new EnemyShip("scout"));
+    if((int)random(0,250) == 0) enemyShips.add(new EnemyShip("adv"));
+    if((int)random(0,450) == 0) enemyShips.add(new EnemyShip("captain"));
+    if((int)random(0,450) == 0) enemyShips.add(new EnemyShip("boss"));
   }
 }
 
@@ -805,4 +820,7 @@ public void mouseCursor() {
 /* Helpers */
 public boolean hasFuel() {
   return(myShip.getCurrentFuel()>0);
+}
+public boolean isAlive() {
+  return (myShip.getCurrentHealth()>0);
 }

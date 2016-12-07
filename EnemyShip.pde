@@ -2,7 +2,7 @@ public class EnemyShip extends SpaceShip {
 
   private double maxHealth,currentHealth;
   private double ACCELERATION;
-  private String type;
+  public String type;
 
   public EnemyShip(String t) {
     corners = 11;
@@ -69,7 +69,7 @@ public class EnemyShip extends SpaceShip {
         break;
     }
   }
-  
+
   public double getMaxHealth() {return maxHealth;}
   public double getCurrentHealth(){return currentHealth;}
   public void setCurrentHealth(double ch){currentHealth += ch;}
