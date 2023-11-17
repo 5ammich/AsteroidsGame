@@ -1,4 +1,20 @@
 class Star //note that this class does NOT extend Floater
 {
-  //your code here
+  private double myStarX, myStarY, rando;
+  public Star(){
+    myStarX = Math.random()*1000;
+    myStarY = Math.random()*1000;
+    rando = Math.random()*0.5;
+  }
+  public void move(){
+    myStarX = myStarX + rando;
+    if (myStarX > 1000){
+      myStarX = 0;
+    }
+  }
+  public void show(){
+    fill(255,255,0);
+    stroke(255,255,0);
+    ellipse((int)myStarX,(int)myStarY,3,3);
+  }
 }
