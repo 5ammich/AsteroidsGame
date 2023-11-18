@@ -1,6 +1,7 @@
 class Star //note that this class does NOT extend Floater
 {
-  private double myStarX, myStarY, rando;
+  private double myStarX, myStarY, random;
+  private int myColor;
   public Star(){
     myStarX = Math.random()*1000;
     myStarY = Math.random()*1000;
