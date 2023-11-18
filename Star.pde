@@ -5,6 +5,7 @@ class Star //note that this class does NOT extend Floater
     myStarX = Math.random()*1000;
     myStarY = Math.random()*1000;
     rando = Math.random()*0.5;
+    myColor = 255, 255, 0;
   }
   public void move(){
     myStarX = myStarX + rando;
@@ -13,8 +14,8 @@ class Star //note that this class does NOT extend Floater
     }
   }
   public void show(){
-    fill(255,255,0);
-    stroke(255,255,0);
+    fill(myColor);
+    stroke(myColor);
     ellipse((int)myStarX,(int)myStarY,3,3);
   }
 }
