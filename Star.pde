@@ -6,7 +6,7 @@ class Star //note that this class does NOT extend Floater
     myStarX = Math.random()*1000;
     myStarY = Math.random()*1000;
     rando = Math.random()*0.5;
-    myColor = 255, 255, 0;
+    myColor = color(255, 255, 0);
   }
   public void move(){
     myStarX = myStarX + rando;
