@@ -37,10 +37,10 @@ class Asteroid extends Floater{
     size = (int)(Math.random()*4)+2;    
     xCorners = new int []{6,6,8,9,-4,-12};
     yCorners = new int []{-3,0,4,7,12,6};
-    for (int i = 0; i < 6; i++){
+    for (int i = 0; i < corners; i++){
       xCorners[i] = xCorners[i] * size;
     }
-    for (int i = 0; i < 6; i++){
+    for (int i = 0; i < corners; i++){
       yCorners[i] = yCorners[i] * size;
     }    
   }
