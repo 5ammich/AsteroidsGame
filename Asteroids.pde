@@ -48,7 +48,3 @@ class Asteroid extends Floater{
     return size;
   }
 }
-  public int getSize(){
-    return size;
-  }
-}
