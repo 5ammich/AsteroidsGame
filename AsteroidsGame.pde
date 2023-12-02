@@ -296,6 +296,7 @@ public void draw()
     if (dan.getSpY() < -12.5){
       dan.setSpY(-12.5);
     }
+    //System.out.println (beta);
     
 }
 
