@@ -258,43 +258,43 @@ public void draw()
     }
     //speed limit
     //BOB
-    if (bob.getSpX() > 12.5){
-      bob.setSpX(12.5);
+    if (bob.getSpX() > 10){
+      bob.setSpX(10);
     }
-    if (bob.getSpX() < -12.5){
-      bob.setSpX(-12.5);
+    if (bob.getSpX() < -10){
+      bob.setSpX(-10);
     }
-    if (bob.getSpY() > 12.5){
-      bob.setSpY(12.5);
+    if (bob.getSpY() > 10){
+      bob.setSpY(10);
     }
-    if (bob.getSpY() < -12.5){
-      bob.setSpY(-12.5);
+    if (bob.getSpY() < -10){
+      bob.setSpY(-10);
     }
     //SUE
-    if (sue.getSpX() > 12.5){
-      sue.setSpX(12.5);
+    if (sue.getSpX() > 10){
+      sue.setSpX(10);
     }
-    if (sue.getSpX() < -12.5){
-      sue.setSpX(-12.5);
+    if (sue.getSpX() < -10){
+      sue.setSpX(-10);
     }
-    if (sue.getSpY() > 12.5){
-      sue.setSpY(12.5);
+    if (sue.getSpY() > 10){
+      sue.setSpY(10);
     }
-    if (sue.getSpY() < -12.5){
-      sue.setSpY(-12.5);
+    if (sue.getSpY() < -10){
+      sue.setSpY(-10);
     }
     //DAN
-    if (dan.getSpX() > 12.5){
-      dan.setSpX(12.5);
+    if (dan.getSpX() > 10){
+      dan.setSpX(10);
     }
-    if (dan.getSpX() < -12.5){
-      dan.setSpX(-12.5);
+    if (dan.getSpX() < -10){
+      dan.setSpX(-10);
     }
-    if (dan.getSpY() > 12.5){
-      dan.setSpY(12.5);
+    if (dan.getSpY() > 10){
+      dan.setSpY(10);
     }
-    if (dan.getSpY() < -12.5){
-      dan.setSpY(-12.5);
+    if (dan.getSpY() < -10){
+      dan.setSpY(-10);
     }
     //System.out.println (beta);
     
