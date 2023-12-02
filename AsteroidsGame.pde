@@ -112,7 +112,7 @@ public void draw()
     rect(600,550,350,150);
     rect(1050,550,350,150);
     fill(0,191,255);
-    textSize(100);
+    textSize(80);
     text("CLASSIC", 600, 650);
     text("BETA", 1125, 650);
     if (mousePressed == true && mRelease ==  true){
