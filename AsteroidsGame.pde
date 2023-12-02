@@ -48,9 +48,9 @@ public void setup()
 public void draw() 
 {
     textSize(50);
-    fill(255,0,255);
-    text(mouseX, 100,100);
-    text(mouseY, 200,100);
+    //fill(255,0,255);
+    //text(mouseX, 100,100);
+    //text(mouseY, 200,100);
     fill(0,0,0,90);
     noStroke();
     rect(0,0,2000,1000);
@@ -296,7 +296,6 @@ public void draw()
     if (dan.getSpY() < -12.5){
       dan.setSpY(-12.5);
     }
-    System.out.println (beta);
     
 }
 
