@@ -196,9 +196,6 @@ public void draw()
         ast.add(new Asteroid());
         ast.add(new Asteroid());
         ast.add(new Asteroid());
-        ast.add(new Asteroid());
-        ast.add(new Asteroid());
-        ast.add(new Asteroid());
         for (int i = oldAst; i < ast.size(); i++){
           if (beta == true){
               ast.get(i).setSpAsteroids();
