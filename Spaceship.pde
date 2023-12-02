@@ -1,12 +1,12 @@
 class Spaceship extends Floater  
 {   
-    public Spaceship(){
-      myCenterX = 500;
-      myCenterY = 500;
+    public Spaceship(int inCorn, int []inXcorn, int[] inYcorn, int inMyCx, int inMyCy){
+      myCenterX = inMyCx;
+      myCenterY = inMyCy;
       myColor = 255;
-      corners = 10;
-      xCorners = new int[]{0,9,0,27+(28/2),0,9,0,-9,-3,-9};
-      yCorners = new int[]{-18,-15,-12,0,12,15,18,9,0,-9};
+      corners = inCorn;
+      xCorners = inXcorn;
+      yCorners = inYcorn;
       myXspeed = 0;
       myYspeed = 0; 
       myPointDirection = 0;
@@ -17,6 +17,23 @@ class Spaceship extends Floater
     public double getMCY(){
       return myCenterY;
     }
+    public double getSpX(){
+      return myXspeed;
+    }
+    public double getSpY(){
+      return myYspeed;
+    }
+    public void setSpX(double enX){
+      myXspeed = enX;
+    }
+    public void setSpY(double enY){
+      myYspeed = enY;
+    }
+    public void setMC(){
+      myCenterX = 480*2;
+      myCenterY = 625;
+    }
+
     public void hyperspace(){
       myCenterX = (int)(Math.random()*900)+50;
       myCenterY = (int)(Math.random()*900)+50;
@@ -24,6 +41,33 @@ class Spaceship extends Floater
       myXspeed = 0;
       myYspeed = 0;
     }
+  public void show ()  //Draws the floater at the current position  
+  {             
+    fill(myColor);   
+    stroke(myColor);    
+    
+    //translate the (x,y) center of the ship to the correct position
+    translate((float)myCenterX, (float)myCenterY);
 
+    //convert degrees to radians for rotate()     
+    float dRadians = (float)(myPointDirection*(Math.PI/180));
+    
+    //rotate so that the polygon will be drawn in the correct direction
+    rotate(dRadians);
+    
+    //draw the polygon
+    beginShape();
+    for (int nI = 0; nI < corners; nI++)
+    {
+      vertex(xCorners[nI], yCorners[nI]);
+    }
+    endShape(CLOSE);
+    if (key == 'w' || key == 'W'){
+      
+    }
+    //"unrotate" and "untranslate" in reverse order
+    rotate(-1*dRadians);
+    translate(-1*(float)myCenterX, -1*(float)myCenterY);
+  }
 
 }
