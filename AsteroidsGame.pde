@@ -190,7 +190,7 @@ public void draw()
           }
       }
     }
-      if (Math.random()*1000000 > 995555 && ast.size() <= 200){
+      if (Math.random()*1000000 > 995555 && ast.size() <= 150){
         int oldAst = ast.size();
         ast.add(new Asteroid());
         ast.add(new Asteroid());
