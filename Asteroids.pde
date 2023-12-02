@@ -1,9 +1,9 @@
 class Asteroid extends Floater{
-  private double rotSpeed;
+  private double rotSpeed; 
   private int size;
   public Asteroid(){
     rotSpeed = Math.random()*5;
-    myColor = color(200,200,200);
+    myColor = color(169,169,169);
     myCenterX = Math.random()*2000;
     myCenterY = Math.random()*2000;
     myXspeed = (Math.random()*2)-1;
@@ -33,10 +33,10 @@ class Asteroid extends Floater{
     }  
   }
   public void setClassicAsteroids(){
-    corners = 6;
+    corners = 7;
     size = (int)(Math.random()*4)+2;    
-    xCorners = new int []{6,6,8,9,-4,-12};
-    yCorners = new int []{-3,0,4,7,12,6};
+    xCorners = new int []{6,6,8,9,-4,-12,-5};
+    yCorners = new int []{-3,0,4,7,12,6,-5};
     for (int i = 0; i < corners; i++){
       xCorners[i] = xCorners[i] * size;
     }
@@ -44,6 +44,10 @@ class Asteroid extends Floater{
       yCorners[i] = yCorners[i] * size;
     }    
   }
+  public int getSize(){
+    return size;
+  }
+}
   public int getSize(){
     return size;
   }
