@@ -145,11 +145,13 @@ public void draw()
           if (ast.get(l).getSize() == 2){
             if (s < 30){
               ast.remove(l);
+              l--;
             }
           }
           else if (ast.get(l).getSize() > 2){
             if (s < 50){
               ast.remove(l);
+              l--;
             }
           }
       }
@@ -162,12 +164,14 @@ public void draw()
           float b = dist((float)bob.getMCX(), (float)bob.getMCY(),(float)ast.get(l).getMyCenterX(), (float)ast.get(l).getMyCenterY());
           if (ast.get(l).getSize() == 2){
             if (b < 30){
-              ast.remove(l);
+              ast.remove(l);   
+              l--;
             }
           }
           else if (ast.get(l).getSize() > 2){
             if (b < 50){
               ast.remove(l);
+              l--;
             }
           }
       }
@@ -180,12 +184,14 @@ public void draw()
           float d = dist((float)dan.getMCX(), (float)dan.getMCY(),(float)ast.get(l).getMyCenterX(), (float)ast.get(l).getMyCenterY());
           if (ast.get(l).getSize() == 2){
             if (d < 30){
-              ast.remove(l);
+              ast.remove(l);  
+              l--;
             }
           }
           else if (ast.get(l).getSize() > 2){
             if (d < 50){
               ast.remove(l);
+              l--;
             }
           }
       }
