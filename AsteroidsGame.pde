@@ -9,7 +9,7 @@ private int []yCorners3 = new int[]{27,0,-27,0};
 private boolean gameStart = false, moveOn = false, mRelease;
 private boolean tri = false, big = false, sq = false;
 private boolean classic = false, beta = false;
-private int astNum = (int)((Math.random()*61))+20;
+private int astNum = (int)((Math.random()*21))+20;
 //big
 Spaceship bob = new Spaceship(10, xCorners1, yCorners1,480*2,625);
 Star []nightSky = new Star[600];
@@ -196,7 +196,7 @@ public void draw()
           }
       }
     }
-      if (Math.random()*2000000 > 1989955 && ast.size() <= 150){
+      if (Math.random()*2000000 > 1989955 && ast.size() <= 80){
         int oldAst = ast.size();
         ast.add(new Asteroid());
         ast.add(new Asteroid());
