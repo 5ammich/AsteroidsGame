@@ -12,7 +12,7 @@ boolean charger1 = false, charger2 = false, charger3 = false, dodge1 = false;
 boolean classic = false, beta = false;
 //boolean pause = false;
 int astNum = (int)((Math.random()*21))+20;
-int timeStorer = 5, fastSetter = 1;
+int timeStorer = 5, fastSetter = 3;
 boolean hider = false, shower = true, unHider = false, speeder = false;
 int hurt = 0; 
 int counter = 0;
