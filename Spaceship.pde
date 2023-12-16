@@ -1,3 +1,5 @@
+private double oldX, oldY;
+
 class Spaceship extends Floater  
 {   
     public Spaceship(int inCorn, int []inXcorn, int[] inYcorn, int inMyCx, int inMyCy){
@@ -23,6 +25,9 @@ class Spaceship extends Floater
     public double getSpY(){
       return myYspeed;
     }
+    public double getMPD(){
+      return myPointDirection; 
+    }
     public void setSpX(double enX){
       myXspeed = enX;
     }
@@ -32,6 +37,24 @@ class Spaceship extends Floater
     public void setMC(){
       myCenterX = 480*2;
       myCenterY = 625;
+    }
+    public void setMCS(){
+      myCenterX = 560;
+      myCenterY = 625;
+    }
+    public void setMCD(){
+      myCenterX = 1375;
+      myCenterY = 625;
+    }
+    
+    //make mover either 50 or -50 so you can dodge left or right
+    
+    public void dodge(int mover){
+       oldX = myCenterX;
+       oldY = myCenterY;
+       myCenterX = myCenterX + mover;
+       line((float)oldX,(float)oldY, (float)myCenterX,(float)myCenterY);
+       rect((float)((myCenterX + oldX)/2), (float)((myCenterY + oldY)/2), 10, 20);
     }
 
     public void hyperspace(){
