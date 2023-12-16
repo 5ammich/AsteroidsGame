@@ -14,6 +14,11 @@ class Asteroid extends Floater{
     turn(rotSpeed);
     super.move();
   }
+  public void setAMC(){
+    myCenterX = Math.random()*2000;
+    myCenterY = Math.random()*2000;
+    
+  }
   public double getMyCenterX(){
     return myCenterX;
   }
