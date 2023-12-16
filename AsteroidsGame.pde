@@ -685,8 +685,10 @@ public void draw()
         fill(0,255,255);
         text("HOW TO PLAY", 750, 200);
         text("W and S to accelerate/decelerate and A and D to rotate the Ship.", 100, 250);
-        text("SPACE to hyperspace and Right Click allows you to dodge asteroids/bullets.", 100, 300);
+        text("SPACE to hyperspace and Right Click allows you to dodge asteroids.", 100, 300);
         text("Left Click allows you to shoot bullets.", 100, 350);
+        text("Pressing R will reset the game.", 100, 550);
+        text("Caution: you may spawn onto an asteroid.", 100, 600);
         stroke(255);
         fill(250,0,0);
         rect(37.5,105,50,50,90);
@@ -788,6 +790,9 @@ public void keyPressed(){
    bob.setMC();
    sue.setMCS();
    dan.setMCD();
+   bob.setMPD();
+   sue.setMPD();
+   dan.setMPD();
    for (int i = 0; i < ast.size(); i++){
      ast.get(i).setAMC();
    }
