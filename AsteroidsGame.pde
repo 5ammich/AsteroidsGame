@@ -44,6 +44,7 @@ ArrayList <Bullet> dill = new ArrayList<Bullet>();
 
 public void setup() 
 {
+  frameRate(24);
   size(2000,1000);
   frameRate(120);
   for (int i = 0; i < nightSky.length; i++){
