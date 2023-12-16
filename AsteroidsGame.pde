@@ -748,7 +748,7 @@ public void keyPressed(){
     if (key == 's' || key == 'S'){
       down = true;
     }
-    if (key == TAB){
+    if (key == 't' || key == 'T'){
 
         pause = !pause;
         hider = false;
