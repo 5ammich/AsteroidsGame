@@ -1,3 +1,5 @@
+//sadly, this does not seem to be working on GitHub, so ignore this class.
+
 class Pause{
   private int boxX, boxY;
   public Pause(){
